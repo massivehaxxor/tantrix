@@ -36,7 +36,6 @@ int Block_Matrix[NBLOCK][NPOS][NMATRIX][NMATRIX] = {
     }, 
   },
   { // L
-
     { // L_UP
       {0, 0, 1, 0},
       {0, 0, 1, 0},
@@ -197,6 +196,9 @@ int Block_Matrix[NBLOCK][NPOS][NMATRIX][NMATRIX] = {
   },
 };
 
+/*
+ * Block_new: returns a random block.
+ */
 struct Block *Block_new()
 {
   struct Block *block;
@@ -223,6 +225,10 @@ int *Cells_new()
   return cells;
 }
 
+/*
+ * Logic_init: returns a struct Logic upon which all the operations are to be done.
+ * First to be called for a new game.
+ */
 struct Logic *Logic_init()
 {
   struct Logic *logic;
@@ -247,8 +253,6 @@ struct Logic *Logic_init()
   return logic;
 }
 
-
-
 /*
  * does_collide: returns 1 if the given block collides or outside borders, 0 otherwise 
  */
@@ -272,12 +276,11 @@ int does_collide(struct Logic *logic, struct Block *block)
       if (logic->cells[y*COL+x] && b)
         return 1;
     }
-
   return 0;
 }
 
 /*
- * put_block: puts the block in cell area
+ * put_block: places the block in cell area
  */
 void put_block(struct Logic *logic, struct Block *block)
 {
@@ -319,7 +322,6 @@ int Logic_advance(struct Logic *logic, int dir)
 
     return 1;
   }
-
   return 0;
 }
 /*
@@ -370,9 +372,18 @@ int Block_move(struct Logic *logic, struct Block *block, int dir)
   return 0;
 }
 
+/*
+ * Block_rotate: rotates the given block in a fixed direction
+ * which is to right.
+ */
 void Block_rotate(struct Logic *logic, struct Block *block)
 {
-  block->pos++; if (block->pos > 3) block->pos = 0;
+  block->pos++; 
+  if (does_collide(logic, block)) {
+    block->pos--;
+    return;
+  }
+  if (block->pos > 3) block->pos = 0;
 }
 
 void Logic_quit(struct Logic *logic)
@@ -381,4 +392,3 @@ void Logic_quit(struct Logic *logic)
   free(logic->next_block);
   free(logic->cells);
 }
-
