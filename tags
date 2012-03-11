@@ -1,0 +1,71 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+Block	logic.h	/^struct Block {$/;"	s
+Block::id	logic.h	/^    int id;$/;"	m	struct:Block	access:public
+Block::pos	logic.h	/^    int pos;$/;"	m	struct:Block	access:public
+Block::x	logic.h	/^    int x, y;$/;"	m	struct:Block	access:public
+Block::y	logic.h	/^    int x, y;$/;"	m	struct:Block	access:public
+Block_Matrix	logic.c	/^int Block_Matrix[NBLOCK][NPOS][NMATRIX][NMATRIX] = {$/;"	v
+Block_move	logic.c	/^int Block_move(struct Logic *logic, struct Block *block, int dir)$/;"	f	signature:(struct Logic *logic, struct Block *block, int dir)
+Block_new	logic.c	/^struct Block *Block_new()$/;"	f
+Block_pos	logic.h	/^enum Block_pos { UP, LEFT, RIGHT, DOWN };$/;"	g
+Block_rotate	logic.c	/^void Block_rotate(struct Logic *logic, struct Block *block)$/;"	f	signature:(struct Logic *logic, struct Block *block)
+Block_rotate	logic.h	/^extern void Block_rotate(struct Logic *logic, struct Block *block);$/;"	p	signature:(struct Logic *logic, struct Block *block)
+Block_type	logic.h	/^enum Block_type { T = 1, Z, L, RL, S, I };$/;"	g
+COL	logic.h	/^enum { ROW = 30, COL = 20 };$/;"	e	enum:__anon1
+Cells_new	logic.c	/^int *Cells_new()$/;"	f
+DOWN	logic.h	/^enum Block_pos { UP, LEFT, RIGHT, DOWN };$/;"	e	enum:Block_pos
+I	logic.h	/^enum Block_type { T = 1, Z, L, RL, S, I };$/;"	e	enum:Block_type
+L	logic.h	/^enum Block_type { T = 1, Z, L, RL, S, I };$/;"	e	enum:Block_type
+LEFT	logic.h	/^enum Block_pos { UP, LEFT, RIGHT, DOWN };$/;"	e	enum:Block_pos
+Logic	logic.h	/^struct Logic {$/;"	s
+Logic::cells	logic.h	/^    int *cells;$/;"	m	struct:Logic	access:public
+Logic::cur_block	logic.h	/^    struct Block *cur_block;$/;"	m	struct:Logic	typeref:struct:Logic::Block	access:public
+Logic::ncol	logic.h	/^    int ncol;$/;"	m	struct:Logic	access:public
+Logic::next_block	logic.h	/^    struct Block *next_block;$/;"	m	struct:Logic	typeref:struct:Logic::Block	access:public
+Logic::nrow	logic.h	/^    int nrow;$/;"	m	struct:Logic	access:public
+Logic_advance	logic.c	/^void Logic_advance(struct Logic *logic, int dir)$/;"	f	signature:(struct Logic *logic, int dir)
+Logic_advance	logic.h	/^extern void Logic_advance(struct Logic *logic, int dir);$/;"	p	signature:(struct Logic *logic, int dir)
+Logic_get_cell	logic.c	/^void Logic_get_cell(struct Logic *logic, int *cells)$/;"	f	signature:(struct Logic *logic, int *cells)
+Logic_get_cell	logic.h	/^extern void Logic_get_cell(struct Logic *logic, int *cells);$/;"	p	signature:(struct Logic *logic, int *cells)
+Logic_init	logic.c	/^struct Logic *Logic_init()$/;"	f
+Logic_init	logic.h	/^extern struct Logic *Logic_init(void);$/;"	p	signature:(void)
+Logic_quit	logic.c	/^void Logic_quit(struct Logic *logic)$/;"	f	signature:(struct Logic *logic)
+Logic_quit	logic.h	/^extern void Logic_quit(struct Logic *logic);$/;"	p	signature:(struct Logic *logic)
+MATRIX_CENTER	logic.c	8;"	d	file:
+NBLOCK	logic.c	/^enum { NBLOCK = 7, NMATRIX = 4, NPOS = 4 };$/;"	e	enum:__anon2	file:
+NMATRIX	logic.c	/^enum { NBLOCK = 7, NMATRIX = 4, NPOS = 4 };$/;"	e	enum:__anon2	file:
+NPOS	logic.c	/^enum { NBLOCK = 7, NMATRIX = 4, NPOS = 4 };$/;"	e	enum:__anon2	file:
+RIGHT	logic.h	/^enum Block_pos { UP, LEFT, RIGHT, DOWN };$/;"	e	enum:Block_pos
+RL	logic.h	/^enum Block_type { T = 1, Z, L, RL, S, I };$/;"	e	enum:Block_type
+ROW	logic.h	/^enum { ROW = 30, COL = 20 };$/;"	e	enum:__anon1
+S	logic.h	/^enum Block_type { T = 1, Z, L, RL, S, I };$/;"	e	enum:Block_type
+Screen_init	screen.h	/^extern void Screen_init(void);$/;"	p	signature:(void)
+Screen_quit	screen.h	/^extern void Screen_quit(void);$/;"	p	signature:(void)
+Screen_refresh	screen.h	/^extern void Screen_refresh(void);$/;"	p	signature:(void)
+T	logic.h	/^enum Block_type { T = 1, Z, L, RL, S, I };$/;"	e	enum:Block_type
+UP	logic.h	/^enum Block_pos { UP, LEFT, RIGHT, DOWN };$/;"	e	enum:Block_pos
+Z	logic.h	/^enum Block_type { T = 1, Z, L, RL, S, I };$/;"	e	enum:Block_type
+__INPUT_H	input.h	2;"	d
+__LOGIC_H	logic.h	2;"	d
+__SCREEN_H_	screen.h	2;"	d
+cells	logic.h	/^    int *cells;$/;"	m	struct:Logic	access:public
+cur_block	logic.h	/^    struct Block *cur_block;$/;"	m	struct:Logic	typeref:struct:Logic::Block	access:public
+does_collide	logic.c	/^int does_collide(struct Logic *logic, struct Block *block)$/;"	f	signature:(struct Logic *logic, struct Block *block)
+id	logic.h	/^    int id;$/;"	m	struct:Block	access:public
+main	main.c	/^int main()$/;"	f
+ncol	logic.h	/^    int ncol;$/;"	m	struct:Logic	access:public
+next_block	logic.h	/^    struct Block *next_block;$/;"	m	struct:Logic	typeref:struct:Logic::Block	access:public
+nrow	logic.h	/^    int nrow;$/;"	m	struct:Logic	access:public
+pos	logic.h	/^    int pos;$/;"	m	struct:Block	access:public
+print_cells	main.c	/^void print_cells(int *cells)$/;"	f	signature:(int *cells)
+put_block	logic.c	/^void put_block(struct Logic *logic, struct Block *block)$/;"	f	signature:(struct Logic *logic, struct Block *block)
+termios_init	input.c	/^void termios_init()$/;"	f
+termios_init	input.h	/^extern void termios_init(void);$/;"	p	signature:(void)
+tlogic_func	main.c	/^void *tlogic_func(void *arg)$/;"	f	signature:(void *arg)
+x	logic.h	/^    int x, y;$/;"	m	struct:Block	access:public
+y	logic.h	/^    int x, y;$/;"	m	struct:Block	access:public
