@@ -9,9 +9,7 @@ enum { NBLOCK = 7, NMATRIX = 4, NPOS = 4 };
 #define M_CENTER NMATRIX / 2
 
 int Block_Matrix[NBLOCK][NPOS][NMATRIX][NMATRIX] = {
-
   { // RL
-
     { // UP
       {0, 0, 1, 0},
       {0, 0, 1, 0},
@@ -208,8 +206,8 @@ struct Block *Block_new()
 
   block->id = rand() % NBLOCK;
   block->pos = UP;
-  block->x = COL / 2 - 1;
-  block->y = 2;
+  block->x = COL / 2;
+  block->y = M_CENTER;
 
   return block;
 }
@@ -257,8 +255,8 @@ struct Logic *Logic_init()
 int does_collide(struct Logic *logic, struct Block *block)
 {
   int j, i;
-  int mx = block->x - 2; /* cell coor. for matrix scan top left */
-  int my = block->y - 2;
+  int mx = block->x - M_CENTER; /* cell coor. for matrix scan top left */
+  int my = block->y - M_CENTER;
 
   for (j = 0; j < NMATRIX; j++) 
     for (i = 0; i < NMATRIX; i++) {
@@ -284,8 +282,8 @@ int does_collide(struct Logic *logic, struct Block *block)
 void put_block(struct Logic *logic, struct Block *block)
 {
   int j, i;
-  int mx = block->x - 2;
-  int my = block->y - 2;
+  int mx = block->x - M_CENTER;
+  int my = block->y - M_CENTER;
 
   for (j = 0; j < NMATRIX; j++)
     for (i = 0; i < NMATRIX; i++) {
@@ -330,26 +328,14 @@ int Logic_advance(struct Logic *logic, int dir)
  */
 void Logic_get_cell(struct Logic *logic, int *cells)
 {
-  int j, i;
   struct Block *block = logic->cur_block;
-  int mx = block->x - 2;
-  int my = block->y - 2;
+  struct Logic tlogic; 
 
   cells = memcpy(cells, logic->cells, sizeof(int) * ROW * COL);
+  memcpy(&tlogic, logic, sizeof(struct Logic)); 
+  tlogic.cells = cells;
 
-  for (j = 0; j < NMATRIX; j++)
-    for (i = 0; i < NMATRIX; i++) {
-      int x = mx + i;
-      int y = my + j;
-      int b = Block_Matrix[block->id][block->pos][j][i];
-      int is_out = (x < 0 || x >= COL || y < 0 || y >= ROW);
-
-      if (is_out)
-        continue;
-      assert((y*COL+x) >= 0 && (y*COL+x) < ROW * COL);
-      if (cells[y*COL+x] == 0)
-        cells[y*COL+x] = b;
-    }
+  put_block(&tlogic, block); /* dirty hackaround to pass the cells array through a temp. Logic struct */
 }
 
 /*
