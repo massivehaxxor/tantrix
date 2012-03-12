@@ -6,8 +6,10 @@
 
 #include "logic.h"
 
+#define ROW 20
+#define COL 10
 
-void print_cells(int *cells)
+void print_cells(int *cells, struct Logic *logic)
 {
   system("clear");
   int j, i;
@@ -19,7 +21,7 @@ void print_cells(int *cells)
   for (i = 0; i < ROW; i++) {
     putchar('#');
     for (j = 0; j < COL; j++) {
-      printf("%c", cells[(i*COL)+j] ? 'x' : ' '); 
+      printf("%c", cells[(i*COL)+j] ? cells[(i*COL)+j] + '0' : ' '); 
     }
     putchar('#');
     putchar('\n');
@@ -30,6 +32,9 @@ void print_cells(int *cells)
   putchar('\n');
 
   printf("Press q to exit\n");
+  printf("block->id = %d\n"
+         "block->pos = %d\n"
+         "block->x, y = %d, %d\n", logic->cur_block->id, logic->cur_block->pos, logic->cur_block->x, logic->cur_block->y);
 }
 
 void *tlogic_func(void *arg)
@@ -40,14 +45,14 @@ void *tlogic_func(void *arg)
 
     Logic_advance(logic, DOWN);
     Logic_get_cell(logic, cells);
-    print_cells(cells);
+    print_cells(cells, logic);
     sleep(1);
   }
 }
 
 int main()
 {
-  struct Logic *logic = Logic_init();
+  struct Logic *logic = Logic_init(ROW, COL);
   pthread_t tlogic;
 
   pthread_create(&tlogic, NULL, tlogic_func, (void *) logic);
@@ -80,7 +85,7 @@ int main()
           break;
       }
       Logic_get_cell(logic, cells);
-      print_cells(cells);
+      print_cells(cells, logic);
     }
 
     usleep(1000000 / 30);
