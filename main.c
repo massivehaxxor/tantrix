@@ -49,7 +49,7 @@ void *tlogic_func(void *arg)
     Logic_advance(logic, DOWN);
     Logic_get_cell(logic, cells);
     print_cells(cells, logic);
-    sleep(1);
+    usleep(1000000 - (logic->level * 100000 ) );
   }
 }
 

@@ -246,6 +246,8 @@ struct Logic *Logic_init(int row, int col)
   logic->nrow = row;
   logic->ncol = col;
 
+  logic->level = 1;
+
   logic->cells = Cells_new(row, col);
   assert(logic->cells);
 
@@ -337,7 +339,7 @@ int clear_lines(struct Logic *logic)
   }
 
   logic->lines += nlines;
-  logic->score += nlines * 100;
+  logic->score += (nlines * 100) * (((double) logic->level / 2) + 1);
 
   return nlines;
 }
@@ -349,21 +351,26 @@ int Logic_advance(struct Logic *logic, int dir)
 {
   if (Block_move(logic, logic->cur_block, dir) && dir == DOWN) {
     struct Block *temp;
+    int t;
 
     put_block(logic, logic->cur_block);
-
 
     free(logic->cur_block);
     logic->cur_block = logic->next_block;
     temp = Block_new(logic);
     logic->next_block = temp;
 
-    if (clear_lines(logic))
-      return 2;
     if (does_collide(logic, logic->cur_block)) {
       printf("GAME OVER\n");
       abort();
     }
+
+    t = clear_lines(logic);
+
+    logic->level = (logic->lines / 10) + 1;
+
+    if (t)
+      return 2;
 
     return 1;
   }
@@ -442,7 +449,7 @@ void Block_hard_drop(struct Logic *logic)
     height++;
 
   if (t == 2) /* see Logic_advance for 2 */
-    logic->score += height * 10;
+    logic->score += (height * 5) * ( ((double) logic->level / 2) + 1 );
 }
 
 void Logic_quit(struct Logic *logic)
