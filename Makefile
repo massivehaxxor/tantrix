@@ -1,6 +1,6 @@
 CC=gcc
 OBJS=input.o logic.o main.o
-CFLAGS=-lpthread
+CFLAGS=-lpthread -g
 
 tantrix: $(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) -o $@
