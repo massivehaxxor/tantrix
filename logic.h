@@ -1,11 +1,9 @@
 #ifndef __LOGIC_H
 #define __LOGIC_H
 
-enum Block_type { T = 1, Z, L, RL, S, I };
+enum Block_type { T = 1, Z, L, RL, S, I, RZ};
 
 enum Block_pos { UP, LEFT, RIGHT, DOWN };
-
-enum { ROW = 30, COL = 10 };
 
 struct Block {
     int id;
@@ -21,7 +19,7 @@ struct Logic {
     struct Block *next_block;
 };
 
-extern struct Logic *Logic_init(void);
+extern struct Logic *Logic_init(int row, int col);
 extern int Logic_advance(struct Logic *logic, int dir);
 extern void Logic_quit(struct Logic *logic);
 extern void Logic_get_cell(struct Logic *logic, int *cells);

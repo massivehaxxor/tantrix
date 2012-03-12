@@ -8,6 +8,9 @@ enum { NBLOCK = 7, NMATRIX = 4, NPOS = 4 };
 
 #define M_CENTER NMATRIX / 2
 
+/* static table data for tetromino shapes used for both drawing and collisions;
+ * saves a lot of conditional statements for the latter.
+ */
 int Block_Matrix[NBLOCK][NPOS][NMATRIX][NMATRIX] = {
   { // RL
     { // UP
@@ -199,7 +202,7 @@ int Block_Matrix[NBLOCK][NPOS][NMATRIX][NMATRIX] = {
 /*
  * Block_new: returns a random block.
  */
-struct Block *Block_new()
+struct Block *Block_new(struct Logic *logic)
 {
   struct Block *block;
 
@@ -208,28 +211,29 @@ struct Block *Block_new()
 
   block->id = rand() % NBLOCK;
   block->pos = UP;
-  block->x = COL / 2;
+  block->x = logic->ncol / 2;
   block->y = M_CENTER;
 
   return block;
 }
 
-int *Cells_new()
+int *Cells_new(int row, int col)
 {
   int *cells;
 
-  cells = calloc(ROW * COL, sizeof(int));
+  cells = calloc(row * col, sizeof(int));
   assert(cells);
-  memset(cells, 0, sizeof(int) * ROW * COL);
+  memset(cells, 0, sizeof(int) * row * col); 
 
   return cells;
 }
 
 /*
- * Logic_init: returns a struct Logic upon which all the operations are to be done.
+ * Logic_init: returns a struct Logic upon which all the internal game operations 
+ * are to be done.
  * First to be called for a new game.
  */
-struct Logic *Logic_init()
+struct Logic *Logic_init(int row, int col)
 {
   struct Logic *logic;
   struct Block *block;
@@ -238,16 +242,16 @@ struct Logic *Logic_init()
   logic = malloc(sizeof(struct Logic));
   assert(logic);
 
-  logic->nrow = ROW;
-  logic->ncol = COL;
+  logic->nrow = row;
+  logic->ncol = col;
 
-  logic->cells = Cells_new();
+  logic->cells = Cells_new(row, col);
   assert(logic->cells);
 
-  block = Block_new();
+  block = Block_new(logic);
   logic->cur_block= block;
 
-  block = Block_new();
+  block = Block_new(logic);
   logic->next_block = block;
 
   return logic;
@@ -267,13 +271,13 @@ int does_collide(struct Logic *logic, struct Block *block)
       int x = mx + i;
       int y = my + j;
       int b = Block_Matrix[block->id][block->pos][j][i];
-      int is_out = (x < 0 || x >= COL || y < 0 || y >= ROW);
+      int is_out = (x < 0 || x >= logic->ncol || y < 0 || y >= logic->nrow);
       if ( b && is_out ) 
         return 1;
       if (is_out)
         continue;
-      assert((y*COL+x) >= 0 && (y*COL+x) < ROW * COL);
-      if (logic->cells[y*COL+x] && b)
+      assert((y*logic->ncol+x) >= 0 && (y*logic->ncol+x) < logic->nrow * logic->ncol);
+      if (logic->cells[y*logic->ncol+x] && b)
         return 1;
     }
   return 0;
@@ -293,37 +297,68 @@ void put_block(struct Logic *logic, struct Block *block)
       int x = mx + i;
       int y = my + j;
       int b = Block_Matrix[block->id][block->pos][j][i]; 
-      int is_out = (x < 0 || x >= COL || y < 0 || y >= ROW);
+      if (!b)
+        continue;
+      int is_out = (x < 0 || x >= logic->ncol || y < 0 || y >= logic->nrow);
       if (is_out)
         continue;
-      assert((y*COL+x) >= 0 && (y*COL+x) < ROW * COL);
-      if (logic->cells[y*COL+x] == 0)
-        logic->cells[y*COL+x] = b;
+      assert((y*logic->ncol+x) >= 0 && (y*logic->ncol+x) < logic->nrow * logic->ncol);
+      if (logic->cells[y*logic->ncol+x] == 0)
+        logic->cells[y*logic->ncol+x] = block->id+1;
     }
 }
 
+void clear_lines(struct Logic *logic)
+{
+  int i, j;
+  int nlines = 0;
+  int last_line = 0;
+
+  for (i = 0; i < logic->nrow; i++) {
+    int linecount = 0;
+
+    for (j = 0; j < logic->ncol; j++)  {
+      if (logic->cells[i*logic->ncol+j])
+        linecount++;
+    }
+
+    if (linecount == logic->ncol) {
+      nlines++;
+      last_line = i;
+    }
+  }
+  if (nlines != 0) {
+    memmove(&logic->cells[nlines*logic->ncol], logic->cells, sizeof(int) * (last_line) * logic->ncol);
+  }
+}
 /*
- * Logic_advance: concludes the periodic step (no user input)
+ * Logic_advance: concludes the periodic step, returns 1
+ * if the block hits, 0 otherwise.
  */
 int Logic_advance(struct Logic *logic, int dir)
 {
   if (Block_move(logic, logic->cur_block, dir) && dir == DOWN) {
     struct Block *temp;
 
-    if (does_collide(logic, logic->next_block)) {
-      printf("GAME OVER\n");
-      getchar();
-    }
     put_block(logic, logic->cur_block);
+    clear_lines(logic);
+
     free(logic->cur_block);
     logic->cur_block = logic->next_block;
-    temp = Block_new();
+    temp = Block_new(logic);
     logic->next_block = temp;
+
+    if (does_collide(logic, logic->cur_block)) {
+      printf("GAME OVER\n");
+      abort();
+    }
 
     return 1;
   }
   return 0;
 }
+
+
 /*
  * Logic_get_cell: returns a pointer to a disposable 2d array of 
  * cell area
@@ -333,7 +368,7 @@ void Logic_get_cell(struct Logic *logic, int *cells)
   struct Block *block = logic->cur_block;
   struct Logic tlogic; 
 
-  cells = memcpy(cells, logic->cells, sizeof(int) * ROW * COL);
+  cells = memcpy(cells, logic->cells, sizeof(int) * logic->nrow * logic->ncol);
   memcpy(&tlogic, logic, sizeof(struct Logic)); 
   tlogic.cells = cells;
 
@@ -378,12 +413,12 @@ int Block_move(struct Logic *logic, struct Block *block, int dir)
  */
 void Block_rotate(struct Logic *logic, struct Block *block)
 {
-  block->pos++; 
+  block->pos++; if (block->pos > 3) block->pos = 0;
+
   if (does_collide(logic, block)) {
-    block->pos--;
+    block->pos--; if (block->pos < 0) block->pos = 3;
     return;
   }
-  if (block->pos > 3) block->pos = 0;
 }
 
 void Logic_quit(struct Logic *logic)
