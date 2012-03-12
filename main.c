@@ -32,9 +32,12 @@ void print_cells(int *cells, struct Logic *logic)
   putchar('\n');
 
   printf("Press q to exit\n");
-  printf("block->id = %d\n"
-         "block->pos = %d\n"
-         "block->x, y = %d, %d\n", logic->cur_block->id, logic->cur_block->pos, logic->cur_block->x, logic->cur_block->y);
+  printf("LEVEL: %d\n"
+         "SCORE: %d\n"
+         "LINES: %d\n",
+         logic->level,
+         logic->score,
+         logic->lines);
 }
 
 void *tlogic_func(void *arg)
@@ -81,7 +84,7 @@ int main()
           Logic_advance(logic, LEFT);
           break;
         case 32: //space
-          while (!Logic_advance(logic, DOWN)) {}
+          Block_hard_drop(logic);
           break;
       }
       Logic_get_cell(logic, cells);

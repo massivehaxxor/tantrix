@@ -241,6 +241,7 @@ struct Logic *Logic_init(int row, int col)
   srand(time(NULL)); 
   logic = malloc(sizeof(struct Logic));
   assert(logic);
+  memset(logic, 0, sizeof(struct Logic));
 
   logic->nrow = row;
   logic->ncol = col;
@@ -308,7 +309,11 @@ void put_block(struct Logic *logic, struct Block *block)
     }
 }
 
-void clear_lines(struct Logic *logic)
+/*
+ * clear_lines: clears all the complete lines, scanning the whole cell area,
+ * sets score accordingly. returns non-zero if clears, 0 otherwise.
+ */
+int clear_lines(struct Logic *logic)
 {
   int i, j;
   int nlines = 0;
@@ -330,10 +335,15 @@ void clear_lines(struct Logic *logic)
   if (nlines != 0) {
     memmove(&logic->cells[nlines*logic->ncol], logic->cells, sizeof(int) * (last_line-nlines+1) * logic->ncol);
   }
+
+  logic->lines += nlines;
+  logic->score += nlines * 100;
+
+  return nlines;
 }
 /*
  * Logic_advance: concludes the periodic step, returns 1
- * if the block hits, 0 otherwise.
+ * if the block hits, 0 otherwise, 2 if clears a line.
  */
 int Logic_advance(struct Logic *logic, int dir)
 {
@@ -341,13 +351,15 @@ int Logic_advance(struct Logic *logic, int dir)
     struct Block *temp;
 
     put_block(logic, logic->cur_block);
-    clear_lines(logic);
+
 
     free(logic->cur_block);
     logic->cur_block = logic->next_block;
     temp = Block_new(logic);
     logic->next_block = temp;
 
+    if (clear_lines(logic))
+      return 2;
     if (does_collide(logic, logic->cur_block)) {
       printf("GAME OVER\n");
       abort();
@@ -419,6 +431,18 @@ void Block_rotate(struct Logic *logic, struct Block *block)
     block->pos--; if (block->pos < 0) block->pos = 3;
     return;
   }
+}
+
+void Block_hard_drop(struct Logic *logic)
+{
+  int height = 0;
+  int t;
+
+  while ( !(t = Logic_advance(logic, DOWN)) )
+    height++;
+
+  if (t == 2) /* see Logic_advance for 2 */
+    logic->score += height * 10;
 }
 
 void Logic_quit(struct Logic *logic)
