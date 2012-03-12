@@ -328,7 +328,7 @@ void clear_lines(struct Logic *logic)
     }
   }
   if (nlines != 0) {
-    memmove(&logic->cells[nlines*logic->ncol], logic->cells, sizeof(int) * (last_line) * logic->ncol);
+    memmove(&logic->cells[nlines*logic->ncol], logic->cells, sizeof(int) * (last_line-nlines+1) * logic->ncol);
   }
 }
 /*
