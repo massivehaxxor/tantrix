@@ -1,4 +1,6 @@
 *.swp
 *.o
-tantrix
+tantrix_curses
+tantrix_test
+
 
