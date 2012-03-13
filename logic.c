@@ -19,7 +19,7 @@ const int Block_Matrix[NBLOCK][NPOS][NMATRIX][NMATRIX] = {
       {0, 0, 0, 0},
     }, 
     { // RIGHT
-      {0, 0, 0, 1},
+      {0, 1, 0, 0},
       {0, 1, 1, 1},
       {0, 0, 0, 0},
       {0, 0, 0, 0},
@@ -39,9 +39,9 @@ const int Block_Matrix[NBLOCK][NPOS][NMATRIX][NMATRIX] = {
   },
   { // L
     { // L_UP
-      {0, 0, 1, 0},
-      {0, 0, 1, 0},
-      {0, 0, 1, 1},
+      {0, 1, 0, 0},
+      {0, 1, 0, 0},
+      {0, 1, 1, 0},
       {0, 0, 0, 0},
     }, 
     { // L_RIGHT
@@ -51,9 +51,9 @@ const int Block_Matrix[NBLOCK][NPOS][NMATRIX][NMATRIX] = {
       {0, 0, 0, 0},
     }, 
     { // L_DOWN
-      {0, 0, 1, 1},
-      {0, 0, 0, 1},
-      {0, 0, 0, 1},
+      {0, 1, 1, 0},
+      {0, 0, 1, 0},
+      {0, 0, 1, 0},
       {0, 0, 0, 0},
     }, 
     { // L_LEFT
