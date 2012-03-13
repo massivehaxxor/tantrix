@@ -3,6 +3,7 @@
 
 enum Block_type { T = 1, Z, L, RL, S, I, RZ};
 
+enum { NBLOCK = 7, NMATRIX = 4, NPOS = 4 };
 enum Block_pos { UP, LEFT, RIGHT, DOWN };
 
 struct Block {
@@ -20,7 +21,10 @@ struct Logic {
     int level;
     int score;
     int lines;
+    int isOver;
 };
+
+extern const int Block_Matrix[NBLOCK][NPOS][NMATRIX][NMATRIX];
 
 extern struct Logic *Logic_init(int row, int col);
 extern int Logic_advance(struct Logic *logic, int dir);

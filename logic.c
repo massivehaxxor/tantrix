@@ -4,14 +4,13 @@
 #include <string.h>
 #include "logic.h"
 
-enum { NBLOCK = 7, NMATRIX = 4, NPOS = 4 };
 
 #define M_CENTER NMATRIX / 2
 
 /* static table data for tetromino shapes used for both drawing and collisions;
  * saves a lot of conditional statements for the latter.
  */
-static const int Block_Matrix[NBLOCK][NPOS][NMATRIX][NMATRIX] = {
+const int Block_Matrix[NBLOCK][NPOS][NMATRIX][NMATRIX] = {
   { // RL
     { // UP
       {0, 0, 1, 0},
@@ -362,7 +361,7 @@ int Logic_advance(struct Logic *logic, int dir)
 
     if (does_collide(logic, logic->cur_block)) {
       printf("GAME OVER\n");
-      abort();
+      logic->isOver = 1;
     }
 
     t = clear_lines(logic);
