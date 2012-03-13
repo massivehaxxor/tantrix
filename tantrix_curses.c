@@ -50,6 +50,49 @@ int quit;
 int is_paused;
 int has_color;
 
+int is_unicode;
+
+void display_unicode_menu()
+{
+  int n, i, item = 0;
+
+  const char menu[2][25] = {
+    "ASCII",
+    "UNICODE",
+  };
+
+  clear();
+  refresh();
+
+  keypad(stdscr, TRUE);
+
+  do {
+
+    for (i = 0; i < 2; i++) {
+      if (i == 1)
+        attrset(COLOR_PAIR(5));
+      if (i == item)
+        attron(A_REVERSE);
+      mvaddstr(10+(i*1), 10, menu[i]);
+      attroff(A_REVERSE);
+      attrset(COLOR_PAIR(9));
+    }
+
+    n = getch();
+
+    switch (n) {
+      case KEY_DOWN: item++; if (item > 1) item = 0; break;
+      case KEY_UP:   item--; if (item < 0) item = 1; break;
+    }
+    
+    refresh();
+  } while (n != '\n');
+
+  is_unicode = item;
+
+  keypad(stdscr, FALSE);
+}
+
 char *box_id_unicode(int id)
 {
   if (!id)
@@ -77,7 +120,10 @@ void draw_nextblock(struct Logic *logic)
       int c = Block_Matrix[logic->next_block->id][UP][i][j];
 
       if (has_color) wattrset(win_score, COLOR_PAIR(logic->next_block->id+1));
-      mvwaddstr(win_score, y+i, x+j, box_id_unicode(c)); 
+      if (is_unicode)
+        mvwaddstr(win_score, y+i, x+j, box_id_unicode(c)); 
+      else
+        mvwaddch(win_score, y+i, x+j, c ? c + '0' : ' '); 
       if (has_color) wattrset(win_score, COLOR_PAIR(9));
     }
 }
@@ -94,7 +140,11 @@ void print_cells(int *cells, struct Logic *logic)
 
       if (c != co) {
         if (has_color) wattrset(win_cell, COLOR_PAIR(c));
-        mvwaddstr(win_cell, i+1, j+1, box_id_unicode(c)); 
+
+        if (is_unicode)
+          mvwaddstr(win_cell, i+1, j+1, box_id_unicode(c)); 
+        else
+          mvwaddch(win_cell, i+1, j+1, c ? c + '0' : ' '); 
         if (has_color) wattrset(win_cell, COLOR_PAIR(9));
       }
     }
@@ -201,18 +251,27 @@ void resize(int sig)
   int nh, nw;
   getmaxyx(stdscr, nh, nw);
 
+  if (nw < (WIN_W + 10) || nh < (WIN_H + 10)) {
+    fprintf(stderr, "I need more space for drawing. Bye.\n");
+    exit(0);
+  }
   draw_screen();
 }
 
 void curses_init()
 {
-  setlocale(LC_ALL, "");
-  logic = Logic_init(ROW, COL);
   initscr();
-  
+  noecho();
+  curs_set(0);
+
   has_color = has_colors();
   start_color();
   if (has_color) init_colors();
+
+  display_unicode_menu();
+
+  cbreak();
+
 
   win_cell = newwin(WIN_H, WIN_W, Score_box.y, Score_box.x+Score_box.w+3);
   assert(win_cell);
@@ -220,11 +279,9 @@ void curses_init()
   win_score = newwin(Score_box.h, Score_box.w, Score_box.y, Score_box.x);
   assert(win_cell);
 
-  draw_screen();
+  logic = Logic_init(ROW, COL);
 
-  noecho();
-  cbreak();
-  curs_set(0);
+  draw_screen();
 
   signal(SIGWINCH, resize);
 }
@@ -232,7 +289,7 @@ void curses_init()
 
 int main(int argc, char *argv[])
 {
-
+  setlocale(LC_ALL, "");
   curses_init();
 
   cell_old = malloc(sizeof(int) * ROW * COL);
