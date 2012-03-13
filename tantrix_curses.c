@@ -1,4 +1,5 @@
-#include <ncurses.h>
+#include <locale.h>
+#include <curses.h>
 #include <pthread.h>
 #include <assert.h>
 #include <string.h>
@@ -41,6 +42,21 @@ int *cell_old;
 
 int quit;
 
+char *box_id_unicode(int id)
+{
+  if (!id)
+    return " ";
+
+  switch (id) {
+    case T: return "\u25a9";
+    case Z: return "\u25a8"; 
+    case L: return "\u25a7"; 
+    case RL: return "\u25a6";
+    case S: return "\u25a5";
+    case I: return "\u25a4";
+    case RZ: return "\u25a3";
+  }
+}
 void draw_nextblock(struct Logic *logic)
 {
   int i, j;
@@ -51,9 +67,10 @@ void draw_nextblock(struct Logic *logic)
   for (i = 0; i < NMATRIX; i++)
     for (j = 0; j < NMATRIX; j++) {
       int c = Block_Matrix[logic->next_block->id][UP][i][j];
-      mvaddch(y+i, x+j, c ? '#' : ' ');
+      mvaddstr(y+i, x+j, box_id_unicode(c)); 
     }
 }
+
 
 void print_cells(int *cells, struct Logic *logic)
 {
@@ -64,8 +81,9 @@ void print_cells(int *cells, struct Logic *logic)
       int c = cells[(i*COL)+j];
       int co = cell_old[(i*COL)+j];
 
-      if (c != co)
-        mvwaddch(win, i+1, j+1, c ? c + '0' : ' '); 
+      if (c != co) {
+        mvwaddstr(win, i+1, j+1, box_id_unicode(c)); 
+      }
     }
   }
 
@@ -138,7 +156,7 @@ void draw_screen()
   addstr(logo);
   draw_overlay();
   draw_nextblock(logic);
-  box(win, '*', '*');
+  box(win, '|', '=');
   refresh();
   wrefresh(win);
 }
@@ -154,6 +172,7 @@ void resize(int sig)
 
 void curses_init()
 {
+  setlocale(LC_ALL, "");
   logic = Logic_init(ROW, COL);
   initscr();
 
