@@ -11,7 +11,7 @@ enum { NBLOCK = 7, NMATRIX = 4, NPOS = 4 };
 /* static table data for tetromino shapes used for both drawing and collisions;
  * saves a lot of conditional statements for the latter.
  */
-int Block_Matrix[NBLOCK][NPOS][NMATRIX][NMATRIX] = {
+static const int Block_Matrix[NBLOCK][NPOS][NMATRIX][NMATRIX] = {
   { // RL
     { // UP
       {0, 0, 1, 0},
@@ -202,7 +202,7 @@ int Block_Matrix[NBLOCK][NPOS][NMATRIX][NMATRIX] = {
 /*
  * Block_new: returns a random block.
  */
-struct Block *Block_new(struct Logic *logic)
+struct Block *Block_new(const struct Logic *logic)
 {
   struct Block *block;
 
@@ -263,7 +263,7 @@ struct Logic *Logic_init(int row, int col)
 /*
  * does_collide: returns 1 if the given block collides or outside borders, 0 otherwise 
  */
-int does_collide(struct Logic *logic, struct Block *block)
+int does_collide(const struct Logic *logic, const struct Block *block)
 {
   int j, i;
   int mx = block->x - M_CENTER; /* cell coor. for matrix scan top left */
@@ -289,7 +289,7 @@ int does_collide(struct Logic *logic, struct Block *block)
 /*
  * put_block: places the block in cell area
  */
-void put_block(struct Logic *logic, struct Block *block)
+void put_block(struct Logic *logic, const struct Block *block)
 {
   int j, i;
   int mx = block->x - M_CENTER;
@@ -382,7 +382,7 @@ int Logic_advance(struct Logic *logic, int dir)
  * Logic_get_cell: returns a pointer to a disposable 2d array of 
  * cell area
  */
-void Logic_get_cell(struct Logic *logic, int *cells)
+void Logic_get_cell(const struct Logic *logic, int *cells)
 {
   struct Block *block = logic->cur_block;
   struct Logic tlogic; 

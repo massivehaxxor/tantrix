@@ -25,7 +25,7 @@ struct Logic {
 extern struct Logic *Logic_init(int row, int col);
 extern int Logic_advance(struct Logic *logic, int dir);
 extern void Logic_quit(struct Logic *logic);
-extern void Logic_get_cell(struct Logic *logic, int *cells);
+extern void Logic_get_cell(const struct Logic *logic, int *cells);
 extern void Block_rotate(struct Logic *logic, struct Block *block);
 extern void Block_hard_drop(struct Logic *logic);
 #endif
