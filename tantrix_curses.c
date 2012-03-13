@@ -1,3 +1,5 @@
+
+#include <unistd.h>
 #include <locale.h>
 #include <curses.h>
 #include <pthread.h>
@@ -39,10 +41,14 @@ WINDOW *win_score;
 
 struct Logic *logic;
 
+pthread_t tlogic;
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+
 int *cell_old;
 
 int quit;
-int pause;
+int is_paused;
+int has_color;
 
 char *box_id_unicode(int id)
 {
@@ -69,7 +75,10 @@ void draw_nextblock(struct Logic *logic)
   for (i = 0; i < NMATRIX; i++)
     for (j = 0; j < NMATRIX; j++) {
       int c = Block_Matrix[logic->next_block->id][UP][i][j];
+
+      if (has_color) wattrset(win_score, COLOR_PAIR(logic->next_block->id+1));
       mvwaddstr(win_score, y+i, x+j, box_id_unicode(c)); 
+      if (has_color) wattrset(win_score, COLOR_PAIR(9));
     }
 }
 
@@ -84,7 +93,9 @@ void print_cells(int *cells, struct Logic *logic)
       int co = cell_old[(i*COL)+j];
 
       if (c != co) {
+        if (has_color) wattrset(win_cell, COLOR_PAIR(c));
         mvwaddstr(win_cell, i+1, j+1, box_id_unicode(c)); 
+        if (has_color) wattrset(win_cell, COLOR_PAIR(9));
       }
     }
   }
@@ -122,11 +133,14 @@ void *tlogic_func(void *arg)
   while (1) {
     int cells[ROW*COL];
 
-    if (pause)
+    if (is_paused)
       goto SKIP;
 
+    pthread_mutex_lock(&mutex);
     Logic_advance(logic, DOWN);
     Logic_get_cell(logic, cells);
+    pthread_mutex_unlock(&mutex);
+
     print_cells(cells, logic);
     if (logic->isOver) {
       curses_quit();
@@ -141,7 +155,6 @@ SKIP:
 
 void draw_overlay()
 {
-
   mvwprintw(win_score, 1, 1, "LEVEL: %d", Score_box.level);
   mvwprintw(win_score, 2, 1, "SCORE: %d", Score_box.score);
   mvwprintw(win_score, 3, 1, "LINES: %d", Score_box.lines);
@@ -158,7 +171,9 @@ void draw_overlay()
 void draw_screen()
 {
   clear();
+  if (has_color) attrset(COLOR_PAIR(1));
   addstr(logo);
+  if (has_color) attrset(COLOR_PAIR(9));
   box(win_score, '|', '=');
   draw_overlay();
   draw_nextblock(logic);
@@ -167,6 +182,19 @@ void draw_screen()
   wrefresh(win_cell);
 }
 
+
+void init_colors()
+{
+  init_pair(1, COLOR_YELLOW, COLOR_BLACK);
+  init_pair(2, COLOR_YELLOW, COLOR_BLACK);
+  init_pair(3, COLOR_CYAN, COLOR_BLACK);
+  init_pair(4, COLOR_BLUE, COLOR_BLACK);
+  init_pair(5, COLOR_GREEN, COLOR_BLACK);
+  init_pair(6, COLOR_RED, COLOR_BLACK);
+  init_pair(7, COLOR_MAGENTA, COLOR_BLACK);
+  init_pair(8, COLOR_WHITE, COLOR_BLACK);
+  init_pair(9, COLOR_WHITE, COLOR_BLACK);
+}
 
 void resize(int sig)
 {
@@ -181,6 +209,10 @@ void curses_init()
   setlocale(LC_ALL, "");
   logic = Logic_init(ROW, COL);
   initscr();
+  
+  has_color = has_colors();
+  start_color();
+  if (has_color) init_colors();
 
   win_cell = newwin(WIN_H, WIN_W, Score_box.y, Score_box.x+Score_box.w+3);
   assert(win_cell);
@@ -200,7 +232,6 @@ void curses_init()
 
 int main(int argc, char *argv[])
 {
-  pthread_t tlogic;
 
   curses_init();
 
@@ -213,9 +244,9 @@ int main(int argc, char *argv[])
     int cells[ROW*COL];
 
     if (n == 'p')
-      pause = !pause;
+      is_paused = !pause;
 
-    if (pause)
+    if (is_paused)
       continue;
 
     switch (n) {
