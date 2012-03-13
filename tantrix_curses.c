@@ -26,7 +26,7 @@ struct {
   int next_block;
 
 } Score_box = {
-  .x = 1,
+  .x = 3,
   .y = 6,
   .w = 13,
   .h = 11,
@@ -34,7 +34,8 @@ struct {
   .next_block = T
 };
 
-WINDOW *win;
+WINDOW *win_cell;
+WINDOW *win_score;
 
 struct Logic *logic;
 
@@ -61,13 +62,13 @@ void draw_nextblock(struct Logic *logic)
 {
   int i, j;
 
-  int x = Score_box.x+1;
-  int y = Score_box.y+6;
+  int x = 1;
+  int y = 6;
 
   for (i = 0; i < NMATRIX; i++)
     for (j = 0; j < NMATRIX; j++) {
       int c = Block_Matrix[logic->next_block->id][UP][i][j];
-      mvaddstr(y+i, x+j, box_id_unicode(c)); 
+      mvwaddstr(win_score, y+i, x+j, box_id_unicode(c)); 
     }
 }
 
@@ -82,29 +83,30 @@ void print_cells(int *cells, struct Logic *logic)
       int co = cell_old[(i*COL)+j];
 
       if (c != co) {
-        mvwaddstr(win, i+1, j+1, box_id_unicode(c)); 
+        mvwaddstr(win_cell, i+1, j+1, box_id_unicode(c)); 
       }
     }
   }
 
   if (logic->level != Score_box.level) {
     Score_box.level = logic->level;
-    mvprintw(Score_box.y+1, Score_box.x+1, "LEVEL: %d", Score_box.level);
+    mvwprintw(win_score, 1, 1, "LEVEL: %d", Score_box.level);
   }
   if (logic->score != Score_box.score) {
     Score_box.score = logic->score;
-    mvprintw(Score_box.y+2, Score_box.x+1, "SCORE: %d", Score_box.score);
+    mvwprintw(win_score, 2, 1, "SCORE: %d", Score_box.score);
   }
   if (logic->lines != Score_box.lines) {
     Score_box.lines = logic->lines;
-    mvprintw(Score_box.y+3, Score_box.x+1, "LINES: %d", Score_box.lines);
+    mvwprintw(win_score, 3, 1, "LINES: %d", Score_box.lines);
   }
   if (Score_box.next_block != logic->next_block->id) {
     Score_box.next_block = logic->next_block->id;
     draw_nextblock(logic);
   }
 
-  wrefresh(win);
+  wrefresh(win_score);
+  wrefresh(win_cell);
 }
 
 void curses_quit()
@@ -134,15 +136,11 @@ void *tlogic_func(void *arg)
 
 void draw_overlay()
 {
-  mvhline(Score_box.y, Score_box.x+1, '=', Score_box.w-1);
-  mvhline(Score_box.y+Score_box.h, Score_box.x+1, '=', Score_box.w-1);
-  mvvline(Score_box.y+1, Score_box.x, '|', Score_box.h-1);
-  mvvline(Score_box.y+1, Score_box.x+Score_box.w, '|', Score_box.h-1);
 
-  mvprintw(Score_box.y+1, Score_box.x+1, "LEVEL: %d", Score_box.level);
-  mvprintw(Score_box.y+2, Score_box.x+1, "SCORE: %d", Score_box.score);
-  mvprintw(Score_box.y+3, Score_box.x+1, "LINES: %d", Score_box.lines);
-  mvaddstr(Score_box.y+4, Score_box.x+1, "NEXT:");
+  mvwprintw(win_score, 1, 1, "LEVEL: %d", Score_box.level);
+  mvwprintw(win_score, 2, 1, "SCORE: %d", Score_box.score);
+  mvwprintw(win_score, 3, 1, "LINES: %d", Score_box.lines);
+  mvwaddstr(win_score, 4, 1, "NEXT:");
 
   mvaddstr(Score_box.y+Score_box.h+1, Score_box.x+1, "- Use arrow");
   mvaddstr(Score_box.y+Score_box.h+2, Score_box.x+1, "keys & Space.");
@@ -154,11 +152,12 @@ void draw_screen()
 {
   clear();
   addstr(logo);
+  box(win_score, '|', '=');
   draw_overlay();
   draw_nextblock(logic);
-  box(win, '|', '=');
+  box(win_cell, '|', '=');
   refresh();
-  wrefresh(win);
+  wrefresh(win_cell);
 }
 
 
@@ -176,8 +175,11 @@ void curses_init()
   logic = Logic_init(ROW, COL);
   initscr();
 
-  win = newwin(WIN_H, WIN_W, 6, 16);
-  assert(win);
+  win_cell = newwin(WIN_H, WIN_W, Score_box.y, Score_box.x+Score_box.w+3);
+  assert(win_cell);
+
+  win_score = newwin(Score_box.h, Score_box.w, Score_box.y, Score_box.x);
+  assert(win_cell);
 
   draw_screen();
 
