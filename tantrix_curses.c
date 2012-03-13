@@ -28,7 +28,7 @@ struct {
 } Score_box = {
   .x = 3,
   .y = 6,
-  .w = 13,
+  .w = 14,
   .h = 11,
   .level = 1,
   .next_block = T
@@ -42,6 +42,7 @@ struct Logic *logic;
 int *cell_old;
 
 int quit;
+int pause;
 
 char *box_id_unicode(int id)
 {
@@ -121,6 +122,9 @@ void *tlogic_func(void *arg)
   while (1) {
     int cells[ROW*COL];
 
+    if (pause)
+      goto SKIP;
+
     Logic_advance(logic, DOWN);
     Logic_get_cell(logic, cells);
     print_cells(cells, logic);
@@ -130,6 +134,7 @@ void *tlogic_func(void *arg)
       exit(0);
     }
     memcpy(cell_old, cells, sizeof(int) * ROW * COL);
+SKIP:
     usleep(1000000 - (logic->level * 100000 ) );
   }
 }
@@ -146,6 +151,8 @@ void draw_overlay()
   mvaddstr(Score_box.y+Score_box.h+2, Score_box.x+1, "keys & Space.");
   mvaddstr(Score_box.y+Score_box.h+4, Score_box.x+1, "- Press 'q'");
   mvaddstr(Score_box.y+Score_box.h+5, Score_box.x+1, "to exit game.");
+  mvaddstr(Score_box.y+Score_box.h+7, Score_box.x+1, "- Press 'p'");
+  mvaddstr(Score_box.y+Score_box.h+8, Score_box.x+1, "to pause game.");
 }
 
 void draw_screen()
@@ -204,6 +211,12 @@ int main(int argc, char *argv[])
   while (!quit) {
     int n = getch();
     int cells[ROW*COL];
+
+    if (n == 'p')
+      pause = !pause;
+
+    if (pause)
+      continue;
 
     switch (n) {
 
