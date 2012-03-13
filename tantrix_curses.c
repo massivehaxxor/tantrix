@@ -244,7 +244,7 @@ int main(int argc, char *argv[])
     int cells[ROW*COL];
 
     if (n == 'p')
-      is_paused = !pause;
+      is_paused = !is_paused;
 
     if (is_paused)
       continue;
