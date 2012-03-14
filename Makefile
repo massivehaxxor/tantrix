@@ -19,5 +19,5 @@ logic.o: logic.c logic.h
 	$(CC) -c logic.c
 
 clean:
-	rm -f $(OBJS) tantrix_curses
+	rm -f $(OBJS) tantrix_curses *.o
 

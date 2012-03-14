@@ -10,11 +10,11 @@
 
 #include "logic.h"
 
-#define WIN_H   22
-#define WIN_W   12
-
 #define ROW   20
 #define COL   10
+
+#define WIN_H   ROW+2
+#define WIN_W   COL+2
 
 const char *logo = " _____ _____ _____ ____  ___ ____  \n"
                    "|_   _| ____|_   _|  _ \\|_ _/ ___| \n"
@@ -251,9 +251,9 @@ void resize(int sig)
   int nh, nw;
   getmaxyx(stdscr, nh, nw);
 
-  if (nw < (WIN_W + 10) || nh < (WIN_H + 10)) {
+  if (nw < (WIN_W + Score_box.w + Score_box.x) || nh < (WIN_H + Score_box.y)) {
     fprintf(stderr, "I need more space for drawing. Bye.\n");
-    exit(0);
+    quit = 1;
   }
   draw_screen();
 }
