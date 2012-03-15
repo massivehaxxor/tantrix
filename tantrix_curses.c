@@ -64,7 +64,6 @@ void display_unicode_menu()
   clear();
   refresh();
 
-  keypad(stdscr, TRUE);
 
   do {
 
@@ -90,7 +89,6 @@ void display_unicode_menu()
 
   is_unicode = item;
 
-  keypad(stdscr, FALSE);
 }
 
 char *box_id_unicode(int id)
@@ -263,6 +261,7 @@ void curses_init()
   initscr();
   noecho();
   curs_set(0);
+  keypad(stdscr, TRUE);
 
   has_color = has_colors();
   start_color();
@@ -271,7 +270,6 @@ void curses_init()
   display_unicode_menu();
 
   cbreak();
-
 
   win_cell = newwin(WIN_H, WIN_W, Score_box.y, Score_box.x+Score_box.w+3);
   assert(win_cell);
@@ -308,22 +306,22 @@ int main(int argc, char *argv[])
 
     switch (n) {
 
-      case 113:
+      case 'q':
         quit = 1;
         break;
-      case 65: //up
+      case KEY_UP: //up
         Block_rotate(logic, logic->cur_block); 
         break;
-      case 66: //down
+      case KEY_DOWN: //down
         Logic_advance(logic, DOWN);
         break;
-      case 67: //right
+      case KEY_RIGHT: //right
         Logic_advance(logic, RIGHT);
         break;
-      case 68: //left
+      case KEY_LEFT: //left
         Logic_advance(logic, LEFT);
         break;
-      case 32: //space
+      case ' ': //space
         Block_hard_drop(logic);
         if (logic->isOver) {
           curses_quit();
@@ -337,7 +335,6 @@ int main(int argc, char *argv[])
     Logic_get_cell(logic, cells);
     print_cells(cells, logic);
     memcpy(cell_old, cells, sizeof(int) * ROW * COL);
-
   }
 
   curses_quit();
