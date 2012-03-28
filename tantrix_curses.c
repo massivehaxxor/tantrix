@@ -199,6 +199,7 @@ void *tlogic_func(void *arg)
 SKIP:
     usleep(1000000 - (logic->level * 100000 ) );
   }
+  return NULL;
 }
 
 void draw_overlay()
