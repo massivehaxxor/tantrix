@@ -174,6 +174,24 @@ void curses_quit()
   endwin();
 }
 
+void gameover()
+{
+  int cells[ROW*COL];
+  WINDOW *win_gameover;
+
+  win_gameover = newwin(3, 20, Score_box.y, Score_box.x+Score_box.w+3+WIN_W+3);
+  box(win_gameover, '|', '=');
+  if (has_color) wattrset(win_gameover, COLOR_PAIR(6));
+  mvwaddstr(win_gameover, 1, 6, "Game Over");
+  if (has_color) wattrset(win_gameover, COLOR_PAIR(1));
+  wrefresh(win_gameover);
+
+  getch();
+  pthread_cancel(tlogic);
+  Logic_quit(logic);
+  curses_quit();
+}
+
 void *tlogic_func(void *arg)
 {
   struct Logic *logic = (struct Logic *) arg;
@@ -188,11 +206,8 @@ void *tlogic_func(void *arg)
     Logic_get_cell(logic, cells);
     print_cells(cells, logic);
     pthread_mutex_unlock(&mutex);
-    if (logic->isOver) {
-      curses_quit();
-      addstr("GAME OVER\n");
-      exit(0);
-    }
+    if (logic->isOver)
+      gameover();
     memcpy(cell_old, cells, sizeof(int) * ROW * COL);
 SKIP:
     usleep(1000000 - (logic->level * 100000 ) );
@@ -323,11 +338,10 @@ int main(int argc, char *argv[])
       case ' ': //space
         Block_hard_drop(logic);
         if (logic->isOver) {
-          curses_quit();
-          addstr("GAME OVER\n");
-          exit(0);
+          Logic_get_cell(logic, cells);
+          print_cells(cells, logic);
+          gameover();
         }
-
         break;
     }
     Logic_get_cell(logic, cells);
