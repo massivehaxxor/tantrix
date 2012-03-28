@@ -360,7 +360,6 @@ int Logic_advance(struct Logic *logic, int dir)
     logic->next_block = temp;
 
     if (does_collide(logic, logic->cur_block)) {
-      printf("GAME OVER\n");
       logic->isOver = 1;
     }
 
