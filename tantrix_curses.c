@@ -1,4 +1,3 @@
-
 #include <unistd.h>
 #include <locale.h>
 #include <curses.h>
@@ -184,12 +183,11 @@ void *tlogic_func(void *arg)
     if (is_paused)
       goto SKIP;
 
-    pthread_mutex_lock(&mutex);
+    pthread_mutex_lock(&mutex); /* Shared data access */
     Logic_advance(logic, DOWN);
     Logic_get_cell(logic, cells);
-    pthread_mutex_unlock(&mutex);
-
     print_cells(cells, logic);
+    pthread_mutex_unlock(&mutex);
     if (logic->isOver) {
       curses_quit();
       addstr("GAME OVER\n");
@@ -295,7 +293,7 @@ int main(int argc, char *argv[])
 
   pthread_create(&tlogic, NULL, tlogic_func, (void *) logic);
 
-  while (!quit) {
+  while (!logic->isOver) {
     int n = getch();
     int cells[ROW*COL];
 
@@ -305,10 +303,10 @@ int main(int argc, char *argv[])
     if (is_paused)
       continue;
 
+    pthread_mutex_lock(&mutex); /* Shared data access */
     switch (n) {
-
       case 'q':
-        quit = 1;
+        logic->isOver = 1;
         break;
       case KEY_UP: //up
         Block_rotate(logic, logic->cur_block); 
@@ -332,12 +330,13 @@ int main(int argc, char *argv[])
 
         break;
     }
-
     Logic_get_cell(logic, cells);
     print_cells(cells, logic);
+    pthread_mutex_unlock(&mutex);
     memcpy(cell_old, cells, sizeof(int) * ROW * COL);
   }
 
+  Logic_quit(logic);
   curses_quit();
 
   return 0;
