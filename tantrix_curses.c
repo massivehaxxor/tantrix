@@ -279,6 +279,8 @@ void draw_overlay()
 void draw_screen()
 {
   clear();
+  wclear(win_score);
+  wclear(win_cell);
   if (has_color) attrset(COLOR_PAIR(1));
   addstr(logo);
   if (has_color) attrset(COLOR_PAIR(9));
@@ -338,6 +340,8 @@ void game_new()
   assert(win_cell);
 
   logic = Logic_init(ROW, COL);
+
+  Score_box.level = Score_box.lines = Score_box.score = 0;
 
   draw_screen();
 
