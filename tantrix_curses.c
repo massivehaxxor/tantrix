@@ -381,6 +381,7 @@ void game_new()
         if (logic->isOver) {
           Logic_get_cell(logic, cells);
           draw_cells(cells, logic);
+          pthread_mutex_unlock(&mutex_logic);
           game_over();
           goto GAME_EXIT;
         }
