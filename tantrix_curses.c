@@ -62,7 +62,7 @@ void curses_quit()
 
 int display_menu(const char menu_items[][25], int num, int def_item)
 {
-  int n, i, item = def_item;
+  int n, i, item = def_item < 0 ? 0 : def_item;
 
   clear();
   refresh();
@@ -110,7 +110,7 @@ void display_main_menu()
   };
 
   while (1) {
-    switch (item = display_menu(menu, 3, 0)) {
+    switch (item = display_menu(menu, 3, item)) {
       case 0:
         new_game();
         break;
