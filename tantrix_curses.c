@@ -49,45 +49,81 @@ int quit;
 int is_paused;
 int has_color;
 
-int is_unicode;
+int is_unicode = 1;
 
-void display_unicode_menu()
+void new_game();
+
+void curses_quit()
 {
-  int n, i, item = 0;
+  erase();
+  endwin();
+  exit(0);
+}
 
-  const char menu[2][25] = {
-    "ASCII",
-    "UNICODE",
-  };
+int display_menu(const char menu_items[][25], int num, int def_item)
+{
+  int n, i, item = def_item;
 
   clear();
   refresh();
-
-
+  addstr(logo);
   do {
 
-    for (i = 0; i < 2; i++) {
-      if (i == 1)
-        attrset(COLOR_PAIR(5));
+    for (i = 0; i < num; i++) {
       if (i == item)
         attron(A_REVERSE);
-      mvaddstr(10+(i*1), 10, menu[i]);
+      mvaddstr(6+(i*1), WIN_W/2, menu_items[i]);
       attroff(A_REVERSE);
-      attrset(COLOR_PAIR(9));
     }
 
     n = getch();
 
     switch (n) {
-      case KEY_DOWN: item++; if (item > 1) item = 0; break;
-      case KEY_UP:   item--; if (item < 0) item = 1; break;
+      case KEY_DOWN: item++; if (item > (num-1)) item = 0; break;
+      case KEY_UP:   item--; if (item < 0) item = num-1; break;
     }
     
     refresh();
   } while (n != '\n');
 
-  is_unicode = item;
+  return item;
+}
 
+void display_unicode_menu()
+{
+  const char menu[2][25] = {
+    "ASCII",
+    "UNICODE",
+  };
+
+  is_unicode = display_menu(menu, 2, is_unicode);
+}
+
+void display_main_menu()
+{
+  int item = -1;
+
+  const char menu[3][25] = {
+    "New Game",
+    "Options",
+    "Quit",
+  };
+
+  while (1) {
+    switch (item = display_menu(menu, 3, 0)) {
+      case 0:
+        new_game();
+        break;
+      case 1:
+        display_unicode_menu();
+        break;
+      case 2:
+        curses_quit();
+        break;
+      default:
+        break;
+    }
+  }
 }
 
 char *box_id_unicode(int id)
@@ -105,6 +141,7 @@ char *box_id_unicode(int id)
     case RZ: return "\u25a3";
   }
 }
+
 void draw_nextblock(struct Logic *logic)
 {
   int i, j;
@@ -168,11 +205,6 @@ void print_cells(int *cells, struct Logic *logic)
   wrefresh(win_cell);
 }
 
-void curses_quit()
-{
-  erase();
-  endwin();
-}
 
 void gameover()
 {
@@ -187,9 +219,7 @@ void gameover()
   wrefresh(win_gameover);
 
   getch();
-  pthread_cancel(tlogic);
-  Logic_quit(logic);
-  curses_quit();
+  delwin(win_gameover);
 }
 
 void *tlogic_func(void *arg)
@@ -200,6 +230,9 @@ void *tlogic_func(void *arg)
 
     if (is_paused)
       goto SKIP;
+
+    if (logic->isOver)
+      pthread_exit(0);
 
     pthread_mutex_lock(&mutex); /* Shared data access */
     Logic_advance(logic, DOWN);
@@ -276,15 +309,15 @@ void curses_init()
   noecho();
   curs_set(0);
   keypad(stdscr, TRUE);
-
   has_color = has_colors();
   start_color();
   if (has_color) init_colors();
+  signal(SIGWINCH, resize);
+  //cbreak();
+}
 
-  display_unicode_menu();
-
-  cbreak();
-
+void new_game()
+{
   win_cell = newwin(WIN_H, WIN_W, Score_box.y, Score_box.x+Score_box.w+3);
   assert(win_cell);
 
@@ -294,15 +327,6 @@ void curses_init()
   logic = Logic_init(ROW, COL);
 
   draw_screen();
-
-  signal(SIGWINCH, resize);
-}
-
-
-int main(int argc, char *argv[])
-{
-  setlocale(LC_ALL, "");
-  curses_init();
 
   cell_old = malloc(sizeof(int) * ROW * COL);
 
@@ -341,6 +365,7 @@ int main(int argc, char *argv[])
           Logic_get_cell(logic, cells);
           print_cells(cells, logic);
           gameover();
+          goto GAME_EXIT;
         }
         break;
     }
@@ -350,7 +375,22 @@ int main(int argc, char *argv[])
     memcpy(cell_old, cells, sizeof(int) * ROW * COL);
   }
 
+GAME_EXIT:
+  delwin(win_cell);
+  delwin(win_score);
   Logic_quit(logic);
+  pthread_cancel(tlogic);
+  pthread_join(tlogic, NULL);
+  free(cell_old);
+}
+
+int main(int argc, char *argv[])
+{
+  setlocale(LC_ALL, "");
+  curses_init();
+
+  display_main_menu();
+
   curses_quit();
 
   return 0;

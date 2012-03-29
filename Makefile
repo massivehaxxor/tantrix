@@ -1,7 +1,7 @@
 CC=gcc
 OBJS=logic.o
 
-CFLAGS=-lpthread -Wall -O0 
+CFLAGS=-pthread -Wall -O0 
 
 ## client executable
 
