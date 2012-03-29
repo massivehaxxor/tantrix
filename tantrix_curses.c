@@ -245,15 +245,17 @@ void *thread_logic_start(void *arg)
       goto SKIP;
 
     if (logic->isOver)
-      pthread_exit(0);
+      return NULL;
 
     pthread_mutex_lock(&mutex_logic); /* Shared data access */
     Logic_advance(logic, DOWN);
     Logic_get_cell(logic, cells);
     draw_cells(cells, logic);
     pthread_mutex_unlock(&mutex_logic);
-    if (logic->isOver)
+    if (logic->isOver) {
       game_over();
+      return NULL;
+    }
     memcpy(cell_old, cells, sizeof(int) * ROW * COL);
 SKIP:
     usleep(1000000 - (logic->level * 100000 ) );
@@ -358,6 +360,9 @@ void game_new()
 
     if (is_paused)
       continue;
+
+    if (logic->isOver) /* the thread may have set this */
+      break;
 
     pthread_mutex_lock(&mutex_logic); /* Shared data access */
     switch (n) {
