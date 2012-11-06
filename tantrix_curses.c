@@ -1,13 +1,13 @@
 #include <unistd.h>
 #include <locale.h>
 #include <curses.h>
-#include <pthread.h>
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
 #include <signal.h>
 
 #include "logic.h"
+#include "tantrix_thread.h"
 
 #define ROW   20
 #define COL   10
@@ -38,8 +38,6 @@ struct {
 WINDOW *win_cell;
 WINDOW *win_score;
 struct Logic *logic;
-pthread_t tlogic;
-pthread_mutex_t mutex_logic = PTHREAD_MUTEX_INITIALIZER;
 int *cell_old;
 int is_paused;
 int has_color;
@@ -247,11 +245,11 @@ void *thread_logic_start(void *arg)
     if (logic->isOver)
       return NULL;
 
-    pthread_mutex_lock(&mutex_logic); /* Shared data access */
+    tanthread_lock(); /* Shared data access */
     Logic_advance(logic, DOWN);
     Logic_get_cell(logic, cells);
     draw_cells(cells, logic);
-    pthread_mutex_unlock(&mutex_logic);
+    tanthread_unlock();
     if (logic->isOver) {
       game_over();
       return NULL;
@@ -349,7 +347,7 @@ void game_new()
 
   cell_old = malloc(sizeof(int) * ROW * COL);
 
-  pthread_create(&tlogic, NULL, thread_logic_start, (void *) logic);
+  tanthread_create(thread_logic_start, (void *) logic);
 
   while (!logic->isOver) {
     int n = getch();
@@ -364,7 +362,7 @@ void game_new()
     if (logic->isOver) /* the thread may have set this */
       break;
 
-    pthread_mutex_lock(&mutex_logic); /* Shared data access */
+    tanthread_lock(); /* Shared data access */
     switch (n) {
       case 'q':
         logic->isOver = 1;
@@ -386,7 +384,7 @@ void game_new()
         if (logic->isOver) {
           Logic_get_cell(logic, cells);
           draw_cells(cells, logic);
-          pthread_mutex_unlock(&mutex_logic);
+          tanthread_unlock();
           game_over();
           goto GAME_EXIT;
         }
@@ -394,7 +392,7 @@ void game_new()
     }
     Logic_get_cell(logic, cells);
     draw_cells(cells, logic);
-    pthread_mutex_unlock(&mutex_logic);
+    tanthread_unlock();
     memcpy(cell_old, cells, sizeof(int) * ROW * COL);
   }
 
@@ -402,8 +400,8 @@ GAME_EXIT:
   delwin(win_cell);
   delwin(win_score);
   Logic_quit(logic);
-  pthread_cancel(tlogic);
-  pthread_join(tlogic, NULL);
+  tanthread_cancel();
+  tanthread_join();
   free(cell_old);
 }
 
