@@ -220,7 +220,11 @@ void draw_cells(int *cells, struct Logic *logic)
 void game_over()
 {
   int cells[ROW*COL];
-  WINDOW *win_game_over;
+  WINDOW *win_game_over, *win_submit_score;
+  char score[10];
+  char name[10] = { };
+   
+  sprintf(score, "%d", Score_box.score);
 
   win_game_over = newwin(3, 20, Score_box.y, Score_box.x+Score_box.w+3+WIN_W+3);
   box(win_game_over, '|', '=');
@@ -229,8 +233,20 @@ void game_over()
   if (has_color) wattrset(win_game_over, COLOR_PAIR(1));
   wrefresh(win_game_over);
 
-  getch();
+  win_submit_score = newwin(6, 20, Score_box.y+5, Score_box.x+Score_box.w+3+WIN_W+3);
+  box(win_submit_score, '|', '=');
+  if (has_color) wattrset(win_submit_score, COLOR_PAIR(6));
+  mvwprintw(win_submit_score, 1, 1, "Your score: %s", score);
+  if (has_color) wattrset(win_submit_score, COLOR_PAIR(1));
+  wrefresh(win_submit_score);
+
+  echo();
+  attron(A_REVERSE);
+  mvwgetnstr(win_submit_score, 2, 1, name, 10);
+  attroff(A_REVERSE);
+  noecho();
   delwin(win_game_over);
+  delwin(win_submit_score);
 }
 
 void *thread_logic_start(void *arg)
@@ -249,11 +265,12 @@ void *thread_logic_start(void *arg)
     Logic_advance(logic, DOWN);
     Logic_get_cell(logic, cells);
     draw_cells(cells, logic);
-    tanthread_unlock();
     if (logic->isOver) {
       game_over();
+      tanthread_unlock();
       return NULL;
     }
+    tanthread_unlock();
     memcpy(cell_old, cells, sizeof(int) * ROW * COL);
 SKIP:
     usleep(1000000 - (logic->level * 100000 ) );
@@ -384,8 +401,8 @@ void game_new()
         if (logic->isOver) {
           Logic_get_cell(logic, cells);
           draw_cells(cells, logic);
-          tanthread_unlock();
           game_over();
+          tanthread_unlock();
           goto GAME_EXIT;
         }
         break;
@@ -400,7 +417,7 @@ GAME_EXIT:
   delwin(win_cell);
   delwin(win_score);
   Logic_quit(logic);
-  tanthread_cancel();
+ // tanthread_cancel();
   tanthread_join();
   free(cell_old);
 }
