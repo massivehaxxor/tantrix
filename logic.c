@@ -299,9 +299,10 @@ void put_block(struct Logic *logic, const struct Block *block)
       int x = mx + i;
       int y = my + j;
       int b = Block_Matrix[block->id][block->pos][j][i]; 
+      int is_out;
       if (!b)
         continue;
-      int is_out = (x < 0 || x >= logic->ncol || y < 0 || y >= logic->nrow);
+      is_out = (x < 0 || x >= logic->ncol || y < 0 || y >= logic->nrow);
       if (is_out)
         continue;
       assert((y*logic->ncol+x) >= 0 && (y*logic->ncol+x) < logic->nrow * logic->ncol);
