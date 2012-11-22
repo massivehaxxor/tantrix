@@ -8,7 +8,8 @@ int init_console(void)
         return -1;
     hndConInput     = GetStdHandle(STD_INPUT_HANDLE);
     hndConOutput    = GetStdHandle(STD_OUTPUT_HANDLE);
-    
+    SetConsoleTitle("Tantrix");
+
     return 0;
 }
 
