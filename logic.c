@@ -3,7 +3,7 @@
 #include <assert.h>
 #include <string.h>
 #include "logic.h"
-
+#include <time.h>
 
 #define M_CENTER NMATRIX / 2
 
@@ -343,6 +343,39 @@ int clear_lines(struct Logic *logic)
 
   return nlines;
 }
+
+/*
+ * Block_move: moves the block in the specified direction 
+ * returns 1 if doesn't due to collision
+ */
+int Block_move(struct Logic *logic, struct Block *block, int dir)
+{
+  switch (dir) {
+    case DOWN:
+      block->y++;
+      if (does_collide(logic, block)) {
+        block->y--;
+        return 1;
+      }
+      break;
+    case RIGHT:
+      block->x++;
+      if (does_collide(logic, block)) {
+        block->x--;
+        return 1;
+      }
+      break;
+    case LEFT:
+      block->x--;
+      if (does_collide(logic, block)) {
+        block->x++;
+        return 1;
+      }
+      break;
+  }
+  return 0;
+}
+
 /*
  * Logic_advance: concludes the periodic step, returns 1
  * if the block hits, 0 otherwise, 2 if clears a line.
@@ -391,38 +424,6 @@ void Logic_get_cell(const struct Logic *logic, int *cells)
   tlogic.cells = cells;
 
   put_block(&tlogic, block); /* dirty hackaround to pass the cells array through a temp. Logic struct */
-}
-
-/*
- * Block_move: moves the block in the specified direction 
- * returns 1 if doesn't due to collision
- */
-int Block_move(struct Logic *logic, struct Block *block, int dir)
-{
-  switch (dir) {
-    case DOWN:
-      block->y++;
-      if (does_collide(logic, block)) {
-        block->y--;
-        return 1;
-      }
-      break;
-    case RIGHT:
-      block->x++;
-      if (does_collide(logic, block)) {
-        block->x--;
-        return 1;
-      }
-      break;
-    case LEFT:
-      block->x--;
-      if (does_collide(logic, block)) {
-        block->x++;
-        return 1;
-      }
-      break;
-  }
-  return 0;
 }
 
 /*

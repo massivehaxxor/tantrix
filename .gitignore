@@ -3,6 +3,9 @@
 *.ppx
 *.ppj
 *.tag
+*~
+*.obj
+*.exe
 tantrix_curses
 tantrix_test
 tags
