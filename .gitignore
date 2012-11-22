@@ -1,5 +1,8 @@
 *.swp
 *.o
+*.ppx
+*.ppj
+*.tag
 tantrix_curses
 tantrix_test
 tags
