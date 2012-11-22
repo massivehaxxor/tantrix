@@ -1,29 +1,23 @@
 #include <windows.h>
 
-#define WCLASSNAME "Tantrix Window"
+HANDLE hndConInput, hndConOutput;
 
-LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
+int init_console(void)
 {
-
-    return DefWindowProc(hwnd, msg, wparam, lparam);
+    if (AllocConsole() == FALSE)
+        return -1;
+    hndConInput     = GetStdHandle(STD_INPUT_HANDLE);
+    hndConOutput    = GetStdHandle(STD_OUTPUT_HANDLE);
+    
+    return 0;
 }
+
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
 {
-    WNDCLASS wc;
-    MSG msg;
-
-    ZeroMemory(&wc, sizeof(WNDCLASS));
-    wc.style            = CS_OWNDC | WS_OVERLAPPED;
-    wc.hbrBackground    = (HBRUSH) (COLOR_WINDOW);
-    wc.hCursor          = LoadCursor(NULL, IDC_ARROW);
-    wc.hIcon            = LoadIcon(NULL, IDC_ICON);
-    wc.lpszClassName    = WCLASSNAME;
-    wc.hInstance        = hInstance;
-    wc.lpfnWndProc      = WndProc;
-
-     
-
+    if (init_console() < 0)
+        MessageBox(NULL, "AllocConsole failed", "Error", MB_OK);
+    
     return 0;
 }
 
