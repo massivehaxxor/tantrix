@@ -138,7 +138,7 @@ void menu_game_draw(void)
         curses_quit();
         break;
       default:
-        break;
+        return;
     }
   }
 }
@@ -248,9 +248,9 @@ void game_over(void)
   wrefresh(win_submit_score);
 
   echo();
-  attron(A_REVERSE);
-  mvwgetnstr(win_submit_score, 2, 1, name, 10);
-  attroff(A_REVERSE);
+    attron(A_REVERSE);
+      mvwgetnstr(win_submit_score, 2, 1, name, 10);
+    attroff(A_REVERSE);
   noecho();
   delwin(win_game_over);
   delwin(win_submit_score);
@@ -259,7 +259,7 @@ void game_over(void)
 void *thread_logic_start(void *arg)
 {
   struct Logic *logic = (struct Logic *) arg;
-  while (1) {
+  for(;;) {
     int cells[ROW*COL];
 
     if (is_paused)
