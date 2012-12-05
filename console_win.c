@@ -1,5 +1,6 @@
 #include <windows.h>
 
+#if 0
 HANDLE hndConInput, hndConOutput;
 
 int init_console(void)
@@ -22,3 +23,5 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     return 0;
 }
 
+
+#endif

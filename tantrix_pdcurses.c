@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdlib.h>
 
+
 #include "logic.h"
 #include "tantrix_thread.h"
 
@@ -12,6 +13,21 @@
 
 #define WIN_H   ROW+2
 #define WIN_W   COL+2
+
+void wcslwr(wchar_t * str)
+{
+  int i = 0;
+  int n = wcslen(str);
+
+  for (i = 0; i < n; i++)
+    str[i] = tolower(str[i]);
+}
+
+void usleep(long val)
+{
+  tansleep(val);
+}
+
 
 const char *logo = " _____ _____ _____ ____  ___ ____  \n"
                    "|_   _| ____|_   _|  _ \\|_ _/ ___| \n"
@@ -39,7 +55,7 @@ struct Logic *logic;
 int *cell_old;
 int is_paused;
 int has_color;
-int is_unicode = 1;
+int is_unicode = 0;
 
 /* Function prototypes */
 void game_new(void);
@@ -342,7 +358,6 @@ void curses_init()
   has_color = has_colors();
   start_color();
   if (has_color) curses_init_colors();
-
   //cbreak();
 }
 
@@ -420,9 +435,11 @@ GAME_EXIT:
   free(cell_old);
 }
 
-int main(int argc, char *argv[])
+
+int main()
 {
   setlocale(LC_ALL, "");
+  PDC_set_resize_limits(30, 30, 62, 62);
   curses_init();
 
   menu_game_draw();
@@ -431,4 +448,13 @@ int main(int argc, char *argv[])
 
   return 0;
 }
+
+
+int __stdcall WinMain(void *a, void *b, void *c, int d)
+{
+  main();
+}
+
+
+
 

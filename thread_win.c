@@ -42,7 +42,7 @@ tanthread_create(void * (*callback)(void *), void * arg)
 #endif
 
     void (*fn)(void *lp) = (void (*)(void *)) callback;
-    _beginthread(fn, 0, NULL);
+    _beginthread(fn, 0, arg);
 }
 
 
