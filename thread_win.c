@@ -4,11 +4,11 @@
 #include "tantrix_thread.h"
 
 static CRITICAL_SECTION cs;
-
+static HANDLE tHandle;
 #if 0
 static int sock;
 static DWORD threadId;
-static HANDLE tHandle;
+
 static HANDLE ghMutex; 
 #endif
 
@@ -42,16 +42,18 @@ tanthread_create(void * (*callback)(void *), void * arg)
 #endif
 
     void (*fn)(void *lp) = (void (*)(void *)) callback;
-    _beginthread(fn, 0, arg);
+    tHandle = (HANDLE)_beginthread(fn, 0, arg);
 }
 
 
 void 
 tanthread_cancel(void)
 {
+  CloseHandle( tHandle );
 }
 
 void 
 tanthread_join(void)
 {
+  CloseHandle( tHandle );
 }
