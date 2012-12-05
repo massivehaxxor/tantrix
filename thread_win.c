@@ -55,6 +55,8 @@ tanthread_cancel(void)
 void 
 tanthread_join(void)
 {
-  WaitForSingleObject(tHandle, INFINITE);
+#if 0
+  WaitForSingleObject(tHandle, INFINITE); /* This, obviously, causes a n<1 seconds delay when quitting */
+#endif
   CloseHandle( tHandle );
 }
