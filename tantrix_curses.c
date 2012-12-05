@@ -7,7 +7,7 @@
 #if defined(__POCC__)
   #if defined(_WIN32)
     #define WIN_POC 1
-wchar_t *wcslwr(wchar_t * str);
+char *strlwr(char * str);
 void usleep(long val);
   #endif
 #endif
@@ -83,7 +83,9 @@ int menu_generic_draw(char menu_items[][25], int num, int def_item)
 
   clear();
   refresh();
+  if (has_color) attrset(COLOR_PAIR(1));
   addstr(logo);
+  if (has_color) attrset(COLOR_PAIR(5));
   do {
 
     for (i = 0; i < num; i++) {

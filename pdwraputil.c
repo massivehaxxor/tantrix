@@ -1,14 +1,13 @@
-#include <wchar.h>
-#include <wctype.h>
+#include <ctype.h>
 
 #include "tantrix_thread.h" /* tansleep */
-wchar_t *wcslwr(wchar_t * str)
+char *strlwr(char *str)
 {
   int i = 0;
-  int n = wcslen(str);
+  int n = strlen(str);
 
   for (i = 0; i < n; i++)
-    str[i] = towlower(str[i]);
+    str[i] = tolower(str[i]);
 }
 
 void usleep(long val)
