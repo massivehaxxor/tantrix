@@ -2,7 +2,7 @@
 #include <wctype.h>
 
 #include "tantrix_thread.h" /* tansleep */
-void wcslwr(wchar_t * str)
+wchar_t *wcslwr(wchar_t * str)
 {
   int i = 0;
   int n = wcslen(str);

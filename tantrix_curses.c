@@ -7,7 +7,7 @@
 #if defined(__POCC__)
   #if defined(_WIN32)
     #define WIN_POC 1
-void wcslwr(wchar_t * str);
+wchar_t *wcslwr(wchar_t * str);
 void usleep(long val);
   #endif
 #endif
@@ -21,7 +21,7 @@ void usleep(long val);
 #define WIN_H   ROW+2
 #define WIN_W   COL+2
 
-const char *logo = " _____ _____ _____ ____  ___ ____  \n"
+char *logo = 	   " _____ _____ _____ ____  ___ ____  \n"
                    "|_   _| ____|_   _|  _ \\|_ _/ ___| \n"
                    "  | | |  _|   | | | |_) || |\\___ \\ \n"
                    "  | | | |___  | | |  _ < | | ___) |\n"
@@ -51,14 +51,14 @@ int is_unicode = 0;
 
 /* Function prototypes */
 void game_new(void);
-void game_over();
+void game_over(void);
 
 void curses_init(void);
 void curses_quit(void);
 void curses_init_colors(void);
 void curses_resize(int sig);
 
-int  menu_generic_draw(const char menu_items[][25], int num, int def_item);
+int  menu_generic_draw(char menu_items[][25], int num, int def_item);
 void menu_unicode_draw(void);
 void menu_game_draw(void);
 
@@ -77,7 +77,7 @@ void curses_quit(void)
   exit(0);
 }
 
-int menu_generic_draw(const char menu_items[][25], int num, int def_item)
+int menu_generic_draw(char menu_items[][25], int num, int def_item)
 {
   int n, i, item = def_item < 0 ? 0 : def_item;
 
@@ -108,7 +108,7 @@ int menu_generic_draw(const char menu_items[][25], int num, int def_item)
 
 void menu_unicode_draw(void)
 {
-  const char menu[2][25] = {
+  char menu[2][25] = {
     "ASCII",
     "UNICODE",
   };
@@ -120,7 +120,7 @@ void menu_game_draw(void)
 {
   int item = -1;
 
-  const char menu[3][25] = {
+  char menu[3][25] = {
     "New Game",
     "Options",
     "Quit",
