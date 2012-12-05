@@ -55,5 +55,6 @@ tanthread_cancel(void)
 void 
 tanthread_join(void)
 {
+  WaitForSingleObject(tHandle, INFINITE);
   CloseHandle( tHandle );
 }
