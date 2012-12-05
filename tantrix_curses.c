@@ -176,7 +176,7 @@ void draw_nextblock(struct Logic *logic)
       if (is_unicode)
         mvwaddstr(win_score, y+i, x+j, get_unicode_from_box_id(c)); 
       else
-        mvwaddch(win_score, y+i, x+j, c ? c + '0' : ' '); 
+        mvwaddch(win_score, y+i, x+j, c ? '#' : ' '); 
       if (has_color) wattrset(win_score, COLOR_PAIR(9));
     }
 }
@@ -197,7 +197,7 @@ void draw_cells(int *cells, struct Logic *logic)
         if (is_unicode)
           mvwaddstr(win_cell, i+1, j+1, get_unicode_from_box_id(c)); 
         else
-          mvwaddch(win_cell, i+1, j+1, c ? c + '0' : ' '); 
+          mvwaddch(win_cell, i+1, j+1, c ? '#' : ' '); 
         if (has_color) wattrset(win_cell, COLOR_PAIR(9));
       }
     }
