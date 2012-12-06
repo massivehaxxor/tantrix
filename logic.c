@@ -351,9 +351,9 @@ static int clear_lines(struct Logic *logic)
 static int Block_move(struct Logic *logic, struct Block *block, int dir)
 {
   switch (dir) {
-    case DOWN:  block->y++; if (does_collide(logic, block)) { block->y--; return 1; }
-    case RIGHT: block->x++; if (does_collide(logic, block)) { block->x--; return 1; }
-    case LEFT:  block->x--; if (does_collide(logic, block)) { block->x++; return 1; }
+    case DOWN:  block->y++; if (does_collide(logic, block)) { block->y--; return 1; } break;
+    case RIGHT: block->x++; if (does_collide(logic, block)) { block->x--; return 1; } break;
+    case LEFT:  block->x--; if (does_collide(logic, block)) { block->x++; return 1; } break;
   }
   return 0;
 }
