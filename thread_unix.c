@@ -1,3 +1,4 @@
+#if WIN_POC
 #include "tantrix_thread.h"
 #include <pthread.h>
 
@@ -42,3 +43,4 @@ tanthread_join()
 }
 
 
+#endif
