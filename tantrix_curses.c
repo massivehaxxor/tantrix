@@ -44,9 +44,9 @@ struct {
 WINDOW *win_cell;
 WINDOW *win_score;
 struct Logic *logic;
-int *cell_old;
-int is_paused;
-int has_color;
+int *cell_old;               /* int * cell_old It's used to keep track of */
+int is_paused;               /* the previous frame for comparing/masking when */
+int has_color;               /* drawing the current frame */
 int is_unicode = 0;
 
 /* Function prototypes */

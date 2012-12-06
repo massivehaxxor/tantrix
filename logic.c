@@ -201,7 +201,7 @@ const int Block_Matrix[NBLOCK][NPOS][NMATRIX][NMATRIX] = {
 /*
  * Block_new: returns a random block.
  */
-struct Block *Block_new(const struct Logic *logic)
+static struct Block *Block_new(const struct Logic *logic)
 {
   struct Block *block;
 
@@ -262,7 +262,7 @@ struct Logic *Logic_init(int row, int col)
 /*
  * does_collide: returns 1 if the given block collides or outside borders, 0 otherwise 
  */
-int does_collide(const struct Logic *logic, const struct Block *block)
+static int does_collide(const struct Logic *logic, const struct Block *block)
 {
   int j, i;
   int mx = block->x - M_CENTER; /* cell coor. for matrix scan top left */
@@ -288,7 +288,7 @@ int does_collide(const struct Logic *logic, const struct Block *block)
 /*
  * put_block: places the block in cell area
  */
-void put_block(struct Logic *logic, const struct Block *block)
+static void put_block(struct Logic *logic, const struct Block *block)
 {
   int j, i;
   int mx = block->x - M_CENTER;
@@ -315,7 +315,7 @@ void put_block(struct Logic *logic, const struct Block *block)
  * clear_lines: clears all the complete lines, scanning the whole cell area,
  * sets score accordingly. returns non-zero if clears, 0 otherwise.
  */
-int clear_lines(struct Logic *logic)
+static int clear_lines(struct Logic *logic)
 {
   int i, j;
   int nlines = 0;
@@ -348,30 +348,12 @@ int clear_lines(struct Logic *logic)
  * Block_move: moves the block in the specified direction 
  * returns 1 if doesn't due to collision
  */
-int Block_move(struct Logic *logic, struct Block *block, int dir)
+static int Block_move(struct Logic *logic, struct Block *block, int dir)
 {
   switch (dir) {
-    case DOWN:
-      block->y++;
-      if (does_collide(logic, block)) {
-        block->y--;
-        return 1;
-      }
-      break;
-    case RIGHT:
-      block->x++;
-      if (does_collide(logic, block)) {
-        block->x--;
-        return 1;
-      }
-      break;
-    case LEFT:
-      block->x--;
-      if (does_collide(logic, block)) {
-        block->x++;
-        return 1;
-      }
-      break;
+    case DOWN:  block->y++; if (does_collide(logic, block)) { block->y--; return 1; }
+    case RIGHT: block->x++; if (does_collide(logic, block)) { block->x--; return 1; }
+    case LEFT:  block->x--; if (does_collide(logic, block)) { block->x++; return 1; }
   }
   return 0;
 }
