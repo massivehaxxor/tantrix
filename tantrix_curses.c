@@ -258,17 +258,13 @@ void game_over(void)
     attroff(A_REVERSE);
   noecho();
   
-  if (Score_box.score > 0) {
-    strcat(s_msg, name);
-    len = strlen(s_msg); s_msg[len++] = ':'; s_msg[len] = '\0';
-    strcat(s_msg, score);
-    submit_score(s_msg);
-  }
-
+  strcat(s_msg, name);
+  len = strlen(s_msg); s_msg[len++] = ':'; s_msg[len] = '\0';
+  strcat(s_msg, score);
+  submit_score(s_msg);
+  
   delwin(win_game_over);
   delwin(win_submit_score);
-
-
 }
 
 void *thread_logic_start(void *arg)
@@ -282,17 +278,17 @@ void *thread_logic_start(void *arg)
 
     if (logic->isOver)
       return NULL;
-
-    tanthread_lock(); /* Shared data access */
-    Logic_advance(logic, DOWN);
-    Logic_get_cell(logic, cells);
-    draw_cells(cells, logic);
-    if (logic->isOver) {
-      game_over();
-      tanthread_unlock();
-      return NULL;
-    }
-    tanthread_unlock();
+                                                        /* Shared data access */
+    tanthread_lock();                                   /* <-                 */
+    Logic_advance(logic, DOWN);                         /*   \   logic        */
+    Logic_get_cell(logic, cells);                       /*   |                */
+    draw_cells(cells, logic);                           /*   |                */
+    if (logic->isOver) {                                /*   |                */
+      game_over();                                      /*   /                */    
+      tanthread_unlock();                               /* <-                 */
+      return NULL;                                      /*   \                */
+    }                                                   /*   /                */
+    tanthread_unlock();                                 /* <-                 */
     memcpy(cell_old, cells, sizeof(int) * ROW * COL);
 SKIP:
     usleep(1000000 - (logic->level * 100000 ) );
@@ -400,48 +396,48 @@ void game_new(void)
     if (logic->isOver) /* the thread may have set this */
       break;
 
-    tanthread_lock(); /* Shared data access */
-    switch (n) {
-      case 'q':
-      case 'Q':
-      case 27: /* ESC*/
-        logic->isOver = 1;
-        break;
-      case KEY_UP: //up
-        Block_rotate(logic, logic->cur_block); 
-        break;
-      case KEY_DOWN: //down
-        Logic_advance(logic, DOWN);
-        break;
-      case KEY_RIGHT: //right
-        Logic_advance(logic, RIGHT);
-        break;
-      case KEY_LEFT: //left
-        Logic_advance(logic, LEFT);
-        break;
-      case ' ': //space
-        Block_hard_drop(logic);
-        if (logic->isOver) {
-          Logic_get_cell(logic, cells);
-          draw_cells(cells, logic);
-          game_over();
-          tanthread_unlock();
-          goto GAME_EXIT;
-        }
-        break;
-    }
-    Logic_get_cell(logic, cells);
-    draw_cells(cells, logic);
-    tanthread_unlock();
+    tanthread_lock(); /* Shared data access */    /* <-       */
+    switch (n) {                                  /*   \      */
+      case 'q':                                   /*   |      */
+      case 'Q':                                   /*   |      */
+      case 27:        /* ESC */                   /*   |      */
+        logic->isOver = 1;                        /*   |      */
+        break;                                    /*   |      */
+      case KEY_UP:                                /*   |      */
+        Block_rotate(logic, logic->cur_block);    /*   |      */
+        break;                                    /*   |      */
+      case KEY_DOWN:                              /*   |      */
+        Logic_advance(logic, DOWN);               /*   |      */
+        break;                                    /*   |      */
+      case KEY_RIGHT:                             /*   |      */
+        Logic_advance(logic, RIGHT);              /*   |      */
+        break;                                    /*   |      */
+      case KEY_LEFT:                              /*   |      */
+        Logic_advance(logic, LEFT);               /*   |      */
+        break;                                    /*   |      */
+      case ' ':                                   /*   |      */
+        Block_hard_drop(logic);                   /*   |      */
+        if (logic->isOver) {                      /*   |      */
+          Logic_get_cell(logic, cells);           /*   |      */
+          draw_cells(cells, logic);               /*   |      */
+          game_over();                            /*   /      */
+          tanthread_unlock();                     /* <-       */
+          goto GAME_EXIT;                         /*   \      */
+        }                                         /*   |      */
+        break;                                    /*   |      */
+    }                                             /*   |      */
+    Logic_get_cell(logic, cells);                 /*   |      */
+    draw_cells(cells, logic);                     /*   /      */
+    tanthread_unlock();                           /* <-       */
     memcpy(cell_old, cells, sizeof(int) * ROW * COL);
   }
 
 GAME_EXIT:
+  tanthread_join();
   delwin(win_cell);
   delwin(win_score);
   Logic_quit(logic);
- // tanthread_cancel();
-  tanthread_join();
+  
   free(cell_old);
 }
 

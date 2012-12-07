@@ -49,5 +49,6 @@ void submit_score(char *score)
   s_ret = send(sockfd, message, strlen(message), 0);
   sprintf(msgbox_msg, "Score sent to server: %s, (%d)", message, s_ret);
   //MessageBox(NULL, msgbox_msg, "Info", MB_OK);
+  closesocket(sockfd);
   WSACleanup();
 }
