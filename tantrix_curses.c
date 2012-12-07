@@ -386,6 +386,7 @@ void game_new(void)
 {
   int i = 0;
   run = 1;
+  memset(cells, ROW*COL, 0);
   win_cell = newwin(WIN_H, WIN_W, Score_box.y, Score_box.x+Score_box.w+3);
   assert(win_cell);
 
