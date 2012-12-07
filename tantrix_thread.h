@@ -7,6 +7,7 @@ void tansleep(int mil);
 void tanthread_create(void * (*func)(void *), void * arg);
 void tanthread_cancel(void);
 void tanthread_join(void);
+void tanthread_wait(void);
 
 #endif
 

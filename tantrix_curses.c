@@ -14,6 +14,7 @@ void usleep(long val);
 
 #include "logic.h"
 #include "tantrix_thread.h"
+#include "tantrix_socket.h"
 
 #define ROW   20
 #define COL   10
@@ -232,7 +233,9 @@ void game_over(void)
   WINDOW *win_game_over, *win_submit_score;
   char score[10];
   char name[10] = { 0 };
-   
+  char s_msg[255];
+  int len;
+
   sprintf(score, "%d", Score_box.score);
 
   win_game_over = newwin(3, 20, Score_box.y, Score_box.x+Score_box.w+3+WIN_W+3);
@@ -254,8 +257,18 @@ void game_over(void)
       mvwgetnstr(win_submit_score, 2, 1, name, 10);
     attroff(A_REVERSE);
   noecho();
+  
+  if (Score_box.score > 0) {
+    strcat(s_msg, name);
+    len = strlen(s_msg); s_msg[len++] = ':'; s_msg[len] = '\0';
+    strcat(s_msg, score);
+    submit_score(s_msg);
+  }
+
   delwin(win_game_over);
   delwin(win_submit_score);
+
+
 }
 
 void *thread_logic_start(void *arg)

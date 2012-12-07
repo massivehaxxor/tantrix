@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <process.h>
 #include "tantrix_thread.h"
+#include "tantrix_socket.h"
 
 static CRITICAL_SECTION cs;
 static HANDLE tHandle;
@@ -50,6 +51,12 @@ void
 tanthread_cancel(void)
 {
   CloseHandle( tHandle );
+}
+
+void
+tanthread_wait(void)
+{
+  WaitForSingleObject(tHandle, INFINITE);
 }
 
 void 
