@@ -439,4 +439,5 @@ void Logic_quit(struct Logic *logic)
   free(logic->cur_block);
   free(logic->next_block);
   free(logic->cells);
+  free(logic);
 }

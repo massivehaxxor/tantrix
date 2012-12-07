@@ -14,6 +14,7 @@ void usleep(long val);
 
 #include "logic.h"
 #include "tantrix_socket.h"
+#include "util.h"
 
 #define ROW   20
 #define COL   10
@@ -233,8 +234,8 @@ void game_over(void)
 {
   WINDOW *win_game_over, *win_submit_score;
   char score[10];
-  char name[10] = { 0 };
-  char s_msg[255];
+  char name[20] = { 0 };
+  char s_msg[255] = { 0 };
   int len;
 
   sprintf(score, "%d", Score_box.score);
@@ -250,15 +251,19 @@ void game_over(void)
   box(win_submit_score, '|', '=');
   if (has_color) wattrset(win_submit_score, COLOR_PAIR(6));
   mvwprintw(win_submit_score, 1, 1, "Your score: %s", score);
+  mvwprintw(win_submit_score, 2, 1, "Your name:");
+  mvwprintw(win_submit_score, 3, 1, "* ");
   if (has_color) wattrset(win_submit_score, COLOR_PAIR(1));
   wrefresh(win_submit_score);
-
+  
   echo();
     attron(A_REVERSE);
-      mvwgetnstr(win_submit_score, 2, 1, name, 10);
+      mvwgetnstr(win_submit_score, 3, 3, name, 10);
     attroff(A_REVERSE);
   noecho();
-  
+
+
+  mytrim(name);
   strcat(s_msg, name);
   len = strlen(s_msg); s_msg[len++] = ':'; s_msg[len] = '\0';
   strcat(s_msg, score);
@@ -340,13 +345,16 @@ void curses_init(void)
 
 void input_process(void)
 {
-  int n = getch();
+  int n;
+
+PAUSE:  
+  n = getch();
 
   if (n == 'p')
     is_paused = !is_paused;
 
   if (is_paused)
-    return;
+    goto PAUSE;
 
   switch (n)
   {
@@ -377,7 +385,7 @@ void input_process(void)
 void game_new(void)
 {
   int i = 0;
-
+  run = 1;
   win_cell = newwin(WIN_H, WIN_W, Score_box.y, Score_box.x+Score_box.w+3);
   assert(win_cell);
 
