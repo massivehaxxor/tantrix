@@ -1,5 +1,5 @@
 #include <ctype.h>
-
+#include <string.h>
 #include "tantrix_thread.h" /* tansleep */
 char *strlwr(char *str)
 {
@@ -8,6 +8,7 @@ char *strlwr(char *str)
 
   for (i = 0; i < n; i++)
     str[i] = tolower(str[i]);
+  return str;
 }
 
 void usleep(long val)

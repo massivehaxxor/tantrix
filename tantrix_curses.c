@@ -13,7 +13,6 @@ void usleep(long val);
 #endif
 
 #include "logic.h"
-#include "tantrix_thread.h"
 #include "tantrix_socket.h"
 
 #define ROW   20
@@ -45,10 +44,12 @@ struct {
 WINDOW *win_cell;
 WINDOW *win_score;
 struct Logic *logic;
+int cells[ROW*COL];
 int *cell_old;               /* int * cell_old It's used to keep track of */
 int is_paused;               /* the previous frame for comparing/masking when */
 int has_color;               /* drawing the current frame */
 int is_unicode = 0;
+int run = 1;
 
 /* Function prototypes */
 void game_new(void);
@@ -267,35 +268,6 @@ void game_over(void)
   delwin(win_submit_score);
 }
 
-void *thread_logic_start(void *arg)
-{
-  struct Logic *logic = (struct Logic *) arg;
-  for(;;) {
-    int cells[ROW*COL];
-
-    if (is_paused)
-      goto SKIP;
-
-    if (logic->isOver)
-      return NULL;
-                                                        /* Shared data access */
-    tanthread_lock();                                   /* <-                 */
-    Logic_advance(logic, DOWN);                         /*   \   logic        */
-    Logic_get_cell(logic, cells);                       /*   |                */
-    draw_cells(cells, logic);                           /*   |                */
-    if (logic->isOver) {                                /*   |                */
-      game_over();                                      /*   /                */    
-      tanthread_unlock();                               /* <-                 */
-      return NULL;                                      /*   \                */
-    }                                                   /*   /                */
-    tanthread_unlock();                                 /* <-                 */
-    memcpy(cell_old, cells, sizeof(int) * ROW * COL);
-SKIP:
-    usleep(1000000 - (logic->level * 100000 ) );
-  }
-  return NULL;
-}
-
 void draw_overlay(void)
 {
   mvwprintw(win_score, 1, 1, "LEVEL: %d", Score_box.level);
@@ -362,11 +334,50 @@ void curses_init(void)
   has_color = has_colors();
   start_color();
   if (has_color) curses_init_colors();
-  //cbreak();
+  cbreak();
+  nodelay(stdscr, TRUE);
+}
+
+void input_process(void)
+{
+  int n = getch();
+
+  if (n == 'p')
+    is_paused = !is_paused;
+
+  if (is_paused)
+    return;
+
+  switch (n)
+  {
+    case 'q':
+    case 'Q':
+    case 27: /* ESC */
+      run = 0;
+      break;
+    case KEY_UP:
+      Block_rotate(logic, logic->cur_block);
+      break;
+    case KEY_DOWN:
+      Logic_advance(logic, DOWN);
+      break;
+    case KEY_RIGHT:
+      Logic_advance(logic, RIGHT);
+      break;
+    case KEY_LEFT:
+      Logic_advance(logic, LEFT);
+      break;
+    case ' ':
+      Block_hard_drop(logic);
+      break;
+  }
+
 }
 
 void game_new(void)
 {
+  int i = 0;
+
   win_cell = newwin(WIN_H, WIN_W, Score_box.y, Score_box.x+Score_box.w+3);
   assert(win_cell);
 
@@ -381,59 +392,23 @@ void game_new(void)
 
   cell_old = malloc(sizeof(int) * ROW * COL);
 
-  tanthread_create(thread_logic_start, (void *) logic);
+  while (!logic->isOver && run) {
 
-  while (!logic->isOver) {
-    int n = getch();
-    int cells[ROW*COL];
-
-    if (n == 'p')
-      is_paused = !is_paused;
-
-    if (is_paused)
-      continue;
-
-    if (logic->isOver) /* the thread may have set this */
-      break;
-
-    tanthread_lock(); /* Shared data access */    /* <-       */
-    switch (n) {                                  /*   \      */
-      case 'q':                                   /*   |      */
-      case 'Q':                                   /*   |      */
-      case 27:        /* ESC */                   /*   |      */
-        logic->isOver = 1;                        /*   |      */
-        break;                                    /*   |      */
-      case KEY_UP:                                /*   |      */
-        Block_rotate(logic, logic->cur_block);    /*   |      */
-        break;                                    /*   |      */
-      case KEY_DOWN:                              /*   |      */
-        Logic_advance(logic, DOWN);               /*   |      */
-        break;                                    /*   |      */
-      case KEY_RIGHT:                             /*   |      */
-        Logic_advance(logic, RIGHT);              /*   |      */
-        break;                                    /*   |      */
-      case KEY_LEFT:                              /*   |      */
-        Logic_advance(logic, LEFT);               /*   |      */
-        break;                                    /*   |      */
-      case ' ':                                   /*   |      */
-        Block_hard_drop(logic);                   /*   |      */
-        if (logic->isOver) {                      /*   |      */
-          Logic_get_cell(logic, cells);           /*   |      */
-          draw_cells(cells, logic);               /*   |      */
-          game_over();                            /*   /      */
-          tanthread_unlock();                     /* <-       */
-          goto GAME_EXIT;                         /*   \      */
-        }                                         /*   |      */
-        break;                                    /*   |      */
-    }                                             /*   |      */
-    Logic_get_cell(logic, cells);                 /*   |      */
-    draw_cells(cells, logic);                     /*   /      */
-    tanthread_unlock();                           /* <-       */
+    input_process();
+    
+    if (i++ % 30 == 0)
+      Logic_advance(logic, DOWN);                                                            
+    
+    Logic_get_cell(logic, cells);
+               
+    draw_cells(cells, logic);                     
     memcpy(cell_old, cells, sizeof(int) * ROW * COL);
+    usleep(1000 * 1000 / 30);
+    //usleep(1000000 - (logic->level * 100000 ) );
   }
+  if (logic->isOver)
+    game_over();
 
-GAME_EXIT:
-  tanthread_join();
   delwin(win_cell);
   delwin(win_score);
   Logic_quit(logic);

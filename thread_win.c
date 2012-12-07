@@ -53,6 +53,12 @@ tanthread_cancel(void)
   CloseHandle( tHandle );
 }
 
+int
+tanthread_isbusy(void)
+{
+  return WaitForSingleObject(tHandle, 0) != WAIT_TIMEOUT;
+}
+
 void 
 tanthread_join(void)
 {
