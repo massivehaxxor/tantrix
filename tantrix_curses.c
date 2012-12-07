@@ -393,10 +393,9 @@ void game_new(void)
   cell_old = malloc(sizeof(int) * ROW * COL);
 
   while (!logic->isOver && run) {
-
     input_process();
     
-    if (i++ % 30 == 0)
+    if (i++ % (20 - logic->level) == 0)
       Logic_advance(logic, DOWN);                                                            
     
     Logic_get_cell(logic, cells);
