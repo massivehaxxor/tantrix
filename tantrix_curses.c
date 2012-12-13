@@ -400,7 +400,7 @@ void game_new(void)
   draw_screen();
 
   cell_old = malloc(sizeof(int) * ROW * COL);
-
+  memset(cell_old, ROW*COL, sizeof(cell_old));
   while (!logic->isOver && run) {
     input_process();
     
