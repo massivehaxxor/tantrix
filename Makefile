@@ -1,5 +1,5 @@
 CC=gcc
-OBJS=logic.o thread_unix.o
+OBJS=logic.o thread_unix.o socket_unix.o
 
 CFLAGS=-pthread -Wall -O0 
 
@@ -20,6 +20,10 @@ logic.o: logic.c logic.h
 
 thread_unix.o: thread_unix.c tantrix_thread.h
 	$(CC) -c thread_unix.c
+
+socket_unix.o: socket_unix.c tantrix_socket.h
+	$(CC) -c socket_unix.c
+
 
 clean:
 	rm -f $(OBJS) tantrix_curses *.o

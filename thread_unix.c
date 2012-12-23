@@ -1,4 +1,4 @@
-#if WIN_POC
+#if !WIN_POC
 #include "tantrix_thread.h"
 #include <pthread.h>
 
