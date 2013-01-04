@@ -44,7 +44,7 @@ struct {
 /* Global variables */
 WINDOW *win_cell;
 WINDOW *win_score;
-struct Logic *logic;
+struct logic_t *logic;
 int cells[ROW*COL];
 int *cell_old;               /* int * cell_old It's used to keep track of */
 int is_paused;               /* the previous frame for comparing/masking when */
@@ -65,8 +65,8 @@ int  menu_generic_draw(char menu_items[][25], int num, int def_item);
 void menu_unicode_draw(void);
 void menu_game_draw(void);
 
-void draw_nextblock(struct Logic *logic);
-void draw_cells(int *cells, struct Logic *logic);
+void draw_nextblock(struct logic_t *logic);
+void draw_cells(int *cells, struct logic_t *logic);
 void draw_overlay(void);
 void draw_screen(void);
 
@@ -166,7 +166,7 @@ char *get_unicode_from_box_id(int id)
   }
 }
 
-void draw_nextblock(struct Logic *logic)
+void draw_nextblock(struct logic_t *logic)
 {
   int i, j;
 
@@ -175,7 +175,7 @@ void draw_nextblock(struct Logic *logic)
 
   for (i = 0; i < NMATRIX; i++)
     for (j = 0; j < NMATRIX; j++) {
-      int c = Block_Matrix[logic->next_block->id][UP][i][j];
+      int c = logic_block_matrix[logic->next_block->id][UP][i][j];
 
       if (has_color) wattrset(win_score, COLOR_PAIR(logic->next_block->id+1));
       if (is_unicode)
@@ -187,7 +187,7 @@ void draw_nextblock(struct Logic *logic)
 }
 
 
-void draw_cells(int *cells, struct Logic *logic)
+void draw_cells(int *cells, struct logic_t *logic)
 {
   int j, i;
 
@@ -364,19 +364,19 @@ PAUSE:
       run = 0;
       break;
     case KEY_UP:
-      Block_rotate(logic, logic->cur_block);
+      logic_block_rotate(logic, logic->cur_block);
       break;
     case KEY_DOWN:
-      Logic_advance(logic, DOWN);
+      logic_advance(logic, DOWN);
       break;
     case KEY_RIGHT:
-      Logic_advance(logic, RIGHT);
+      logic_advance(logic, RIGHT);
       break;
     case KEY_LEFT:
-      Logic_advance(logic, LEFT);
+      logic_advance(logic, LEFT);
       break;
     case ' ':
-      Block_hard_drop(logic);
+      logic_block_hard_drop(logic);
       break;
   }
 
@@ -393,7 +393,7 @@ void game_new(void)
   win_score = newwin(Score_box.h, Score_box.w, Score_box.y, Score_box.x);
   assert(win_cell);
 
-  logic = Logic_init(ROW, COL);
+  logic = logic_init(ROW, COL);
 
   Score_box.level = Score_box.lines = Score_box.score = 0;
 
@@ -406,21 +406,21 @@ void game_new(void)
     input_process();
     
     if (i++ % (20 - logic->level) == 0)
-      Logic_advance(logic, DOWN);                                                            
+      logic_advance(logic, DOWN);                                                            
     
-    Logic_get_cell(logic, cells);
+    logic_get_cell(logic, cells);
                
     draw_cells(cells, logic);                     
     memcpy(cell_old, cells, sizeof(int) * ROW * COL);
     usleep(1000 * 1000 / 30);
-    //usleep(1000000 - (logic->level * 100000 ) );
+    //usleep(1000 - (logic->level * 1000 ) );
   }
   if (logic->isOver)
     game_over();
 
   delwin(win_cell);
   delwin(win_score);
-  Logic_quit(logic);
+  logic_quit(logic);
   
   free(cell_old);
 }

@@ -1,35 +1,35 @@
 #ifndef __LOGIC_H
 #define __LOGIC_H
 
-enum Block_type { T = 1, Z, L, RL, S, I, RZ};
+enum block_enum_shape { T = 1, Z, L, RL, S, I, RZ};
 
 enum { NBLOCK = 7, NMATRIX = 4, NPOS = 4 };
-enum Block_pos { UP, LEFT, RIGHT, DOWN };
+enum block_enum_pos { UP, LEFT, RIGHT, DOWN };
 
-struct Block {
+struct block_t {
     int id;
     int pos;
     int x, y;
 };
 
-struct Logic {
+struct logic_t {
     int *cells;
     int nrow;
     int ncol;
-    struct Block *cur_block;
-    struct Block *next_block;
+    struct block_t *cur_block;
+    struct block_t *next_block;
     int level;
     int score;
     int lines;
     int isOver;
 };
 
-extern const int Block_Matrix[NBLOCK][NPOS][NMATRIX][NMATRIX];
+extern const int        logic_block_matrix[NBLOCK][NPOS][NMATRIX][NMATRIX];
 
-extern struct Logic *Logic_init(int row, int col);
-extern int Logic_advance(struct Logic *logic, int dir);
-extern void Logic_quit(struct Logic *logic);
-extern void Logic_get_cell(const struct Logic *logic, int *cells);
-extern void Block_rotate(struct Logic *logic, struct Block *block);
-extern void Block_hard_drop(struct Logic *logic);
+extern struct logic_t * logic_init (int row, int col);
+extern int              logic_advance (struct logic_t *logic, int dir);
+extern void             logic_quit (struct logic_t *logic);
+extern void             logic_get_cell (const struct logic_t *logic, int *cells);
+extern void             logic_block_rotate (struct logic_t *logic, struct block_t *block);
+extern void             logic_block_hard_drop (struct logic_t *logic);
 #endif

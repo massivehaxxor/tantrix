@@ -10,7 +10,7 @@
 /* static table data for tetromino shapes used for both drawing and collisions;
  * saves a lot of conditional statements for the latter.
  */
-const int Block_Matrix[NBLOCK][NPOS][NMATRIX][NMATRIX] = {
+const int logic_block_matrix[NBLOCK][NPOS][NMATRIX][NMATRIX] = {
   { // RL
     { // UP
       {0, 0, 1, 0},
@@ -201,11 +201,11 @@ const int Block_Matrix[NBLOCK][NPOS][NMATRIX][NMATRIX] = {
 /*
  * Block_new: returns a random block.
  */
-static struct Block *Block_new(const struct Logic *logic)
+static struct block_t *Block_new(const struct logic_t *logic)
 {
-  struct Block *block;
+  struct block_t *block;
 
-  block = malloc(sizeof(struct Block));
+  block = malloc(sizeof(struct block_t));
   assert(block);
 
   block->id = rand() % NBLOCK;
@@ -228,19 +228,19 @@ int *Cells_new(int row, int col)
 }
 
 /*
- * Logic_init: returns a struct Logic upon which all the internal game operations 
+ * logic_init: returns a struct logic_t upon which all the internal game operations 
  * are to be done.
  * First to be called for a new game.
  */
-struct Logic *Logic_init(int row, int col)
+struct logic_t *logic_init(int row, int col)
 {
-  struct Logic *logic;
-  struct Block *block;
+  struct logic_t *logic;
+  struct block_t *block;
 
   srand(time(NULL)); 
-  logic = malloc(sizeof(struct Logic));
+  logic = malloc(sizeof(struct logic_t));
   assert(logic);
-  memset(logic, 0, sizeof(struct Logic));
+  memset(logic, 0, sizeof(struct logic_t));
 
   logic->nrow = row;
   logic->ncol = col;
@@ -262,7 +262,7 @@ struct Logic *Logic_init(int row, int col)
 /*
  * does_collide: returns 1 if the given block collides or outside borders, 0 otherwise 
  */
-static int does_collide(const struct Logic *logic, const struct Block *block)
+static int does_collide(const struct logic_t *logic, const struct block_t *block)
 {
   int j, i;
   int mx = block->x - M_CENTER; /* cell coor. for matrix scan top left */
@@ -272,7 +272,7 @@ static int does_collide(const struct Logic *logic, const struct Block *block)
     for (i = 0; i < NMATRIX; i++) {
       int x = mx + i;
       int y = my + j;
-      int b = Block_Matrix[block->id][block->pos][j][i];
+      int b = logic_block_matrix[block->id][block->pos][j][i];
       int is_out = (x < 0 || x >= logic->ncol || y < 0 || y >= logic->nrow);
       if ( b && is_out ) 
         return 1;
@@ -288,7 +288,7 @@ static int does_collide(const struct Logic *logic, const struct Block *block)
 /*
  * put_block: places the block in cell area
  */
-static void put_block(struct Logic *logic, const struct Block *block)
+static void put_block(struct logic_t *logic, const struct block_t *block)
 {
   int j, i;
   int mx = block->x - M_CENTER;
@@ -298,7 +298,7 @@ static void put_block(struct Logic *logic, const struct Block *block)
     for (i = 0; i < NMATRIX; i++) {
       int x = mx + i;
       int y = my + j;
-      int b = Block_Matrix[block->id][block->pos][j][i]; 
+      int b = logic_block_matrix[block->id][block->pos][j][i]; 
       int is_out;
       if (!b)
         continue;
@@ -315,7 +315,7 @@ static void put_block(struct Logic *logic, const struct Block *block)
  * clear_lines: clears all the complete lines, scanning the whole cell area,
  * sets score accordingly. returns non-zero if clears, 0 otherwise.
  */
-static int clear_lines(struct Logic *logic)
+static int clear_lines(struct logic_t *logic)
 {
   int i, j;
   int nlines = 0;
@@ -348,7 +348,7 @@ static int clear_lines(struct Logic *logic)
  * Block_move: moves the block in the specified direction 
  * returns 1 if doesn't due to collision
  */
-static int Block_move(struct Logic *logic, struct Block *block, int dir)
+static int Block_move(struct logic_t *logic, struct block_t *block, int dir)
 {
   switch (dir) {
     case DOWN:  block->y++; if (does_collide(logic, block)) { block->y--; return 1; } break;
@@ -359,13 +359,13 @@ static int Block_move(struct Logic *logic, struct Block *block, int dir)
 }
 
 /*
- * Logic_advance: concludes the periodic step, returns 1
+ * logic_advance: concludes the periodic step, returns 1
  * if the block hits, 0 otherwise, 2 if clears a line.
  */
-int Logic_advance(struct Logic *logic, int dir)
+int logic_advance(struct logic_t *logic, int dir)
 {
   if (Block_move(logic, logic->cur_block, dir) && dir == DOWN) {
-    struct Block *temp;
+    struct block_t *temp;
     int t;
 
     put_block(logic, logic->cur_block);
@@ -393,26 +393,26 @@ int Logic_advance(struct Logic *logic, int dir)
 
 
 /*
- * Logic_get_cell: returns a pointer to a disposable 2d array of 
+ * logic_get_cell: returns a pointer to a disposable 2d array of 
  * cell area
  */
-void Logic_get_cell(const struct Logic *logic, int *cells)
+void logic_get_cell(const struct logic_t *logic, int *cells)
 {
-  struct Block *block = logic->cur_block;
-  struct Logic tlogic; 
+  struct block_t *block = logic->cur_block;
+  struct logic_t tlogic; 
 
   cells = memcpy(cells, logic->cells, sizeof(int) * logic->nrow * logic->ncol);
-  memcpy(&tlogic, logic, sizeof(struct Logic)); 
+  memcpy(&tlogic, logic, sizeof(struct logic_t)); 
   tlogic.cells = cells;
 
-  put_block(&tlogic, block); /* dirty hackaround to pass the cells array through a temp. Logic struct */
+  put_block(&tlogic, block); /* dirty hackaround to pass the cells array through a temp. logic_t struct */
 }
 
 /*
- * Block_rotate: rotates the given block in a fixed direction
+ * logic_block_rotate: rotates the given block in a fixed direction
  * which is to right.
  */
-void Block_rotate(struct Logic *logic, struct Block *block)
+void logic_block_rotate(struct logic_t *logic, struct block_t *block)
 {
   block->pos++; if (block->pos > 3) block->pos = 0;
 
@@ -422,19 +422,19 @@ void Block_rotate(struct Logic *logic, struct Block *block)
   }
 }
 
-void Block_hard_drop(struct Logic *logic)
+void logic_block_hard_drop(struct logic_t *logic)
 {
   int height = 0;
   int t;
 
-  while ( !(t = Logic_advance(logic, DOWN)) )
+  while ( !(t = logic_advance(logic, DOWN)) )
     height++;
 
-  if (t == 2) /* see Logic_advance for 2 */
+  if (t == 2) /* see logic_advance for 2 */
     logic->score += (height * 5) * ( ((double) logic->level / 2) + 1 );
 }
 
-void Logic_quit(struct Logic *logic)
+void logic_quit(struct logic_t *logic)
 {
   free(logic->cur_block);
   free(logic->next_block);
