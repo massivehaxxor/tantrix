@@ -71,7 +71,6 @@ void draw_overlay(void);
 void draw_screen(void);
 
 char *get_unicode_from_box_id(int id);
-void *thread_logic_start(void *arg);
 
 void curses_quit(void)
 {
