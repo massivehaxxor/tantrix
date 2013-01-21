@@ -1,17 +1,18 @@
 CC=gcc
-OBJS=logic.o thread_unix.o socket_unix.o
+OBJS=logic.o thread_unix.o socket_unix.o 
 
-CFLAGS=-pthread -Wall -O0 
+CFLAGS=-lpthread -Wall -O0 
 
 ## client executable
 
 tantrix_curses: $(OBJS) tantrix_curses.o
-	$(CC) $(CFLAGS) -lncursesw $(OBJS) tantrix_curses.o -o $@
+	$(CC) $(CFLAGS) $(OBJS) tantrix_curses.o `ncurses6-config --libs` -o $@
 
 ## client obj
 
 tantrix_curses.o: tantrix_curses.c 
-	$(CC) -c tantrix_curses.c -std=c99 -Wno-implicit
+	$(CC) -c tantrix_curses.c -std=c99 -Wno-implicit `ncurses6-config --cflags`
+
 
 ## OBJS
 
