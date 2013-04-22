@@ -1,33 +1,22 @@
-CC=gcc
-OBJS=logic.o util.o socket_unix.o
+CC		    = gcc
+CFLAGS	    = -I. -Wall -g -O0 
+LDFLAGS	    = -g -O0
+OBJS	    = logic.o util.o socket_unix.o tantrix_curses.o
 
-CFLAGS=-pthread -Wall -O0 
+DEPS		= ncursesw
 
 ## client executable
 
-all: tantrix_curses
+CFLAGS		+= $(shell pkg-config $(DEPS) --cflags)
+LDFLAGS		+= $(shell pkg-config $(DEPS) --libs)
 
-tantrix_curses: $(OBJS) tantrix_curses.o
-	$(CC) $(CFLAGS) -lncursesw $(OBJS) tantrix_curses.o -o $@
+all: tantrix
 
-## client obj
+tantrix: $(OBJS) 
+	$(CC) $(OBJS) $(CFLAGS) $(LDFLAGS) -o $@
 
-tantrix_curses.o: tantrix_curses.c 
-	$(CC) -c tantrix_curses.c -std=c99 -Wno-implicit
-
-## OBJS
-
-logic.o: logic.c logic.h
-	$(CC) -c logic.c
-
-util.o : util.c util.h
-	$(CC) -c util.c
-
-socket_unix.o: socket_unix.c
-	$(CC) -c socket_unix.c
+.PHONY: clean
 
 clean:
 	rm -f $(OBJS) tantrix_curses *.o
-
-.PHONY: all clean
 
