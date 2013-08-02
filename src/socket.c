@@ -7,13 +7,13 @@
 #include <errno.h>
 #include <sys/types.h>
 
-#if defined(unix)
+#if defined(_WIN32)
+    #include <io.h>
+    #include <WS2tcpip.h>
+#else
     #include <sys/socket.h>
     #include <netdb.h>
     #include <unistd.h>
-#elif defined(_WIN32)
-    #include <io.h>
-    #include <WS2tcpip.h>
 #endif
 
 #define debug(args...) \
