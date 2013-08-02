@@ -11,6 +11,7 @@
     #include <io.h>
     #include <WS2tcpip.h>
 #else
+    #include <sys/types.h>
     #include <sys/socket.h>
     #include <netdb.h>
     #include <unistd.h>
