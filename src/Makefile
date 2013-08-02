@@ -1,5 +1,5 @@
 CC		    = gcc
-CFLAGS	    = -I. -Wall -g -O0 
+CFLAGS	    = -I. -Wall -g -O0 -std=c99
 LDFLAGS	    = -g -O0
 OBJS	    = logic.o util.o socket.o tantrix_curses.o
 

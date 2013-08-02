@@ -16,6 +16,12 @@ void usleep(long val);
   #endif
 #endif
 
+#if defined(_WIN32)
+#include <windows.h>
+#else
+#include <unistd.h>
+#endif
+
 
 #define ROW   20
 #define COL   10
@@ -231,13 +237,11 @@ void draw_cells(int *cells, struct logic_t *logic)
 
 void submit_score(char *score)
 {
-  struct socket_t socket = {0};
   char message[512];
-  char msgbox_msg[512];
+  struct socket_t socket = {0};
 
   socket.host_name = "www.codedumpster.com";
   socket.port = "80";
-    
 
   sprintf(message, "GET /tantrix/?%s HTTP/1.0\r\n\r\n", score);
 
@@ -428,8 +432,11 @@ void game_new(void)
                
     draw_cells(cells, logic);                     
     memcpy(cell_old, cells, sizeof(int) * ROW * COL);
+#if defined(_WIN32)
+    Sleep(1000 / 30);
+#else
     usleep(1000 * 1000 / 30);
-    //usleep(1000 - (logic->level * 1000 ) );
+#endif
   }
   if (logic->isOver)
     game_over();
