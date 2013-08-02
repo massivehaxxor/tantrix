@@ -1,3 +1,7 @@
+#include "logic.h"
+#include "util.h"
+#include "socket.h"
+
 #include <locale.h>
 #include <curses.h>
 #include <assert.h>
@@ -12,9 +16,6 @@ void usleep(long val);
   #endif
 #endif
 
-#include "logic.h"
-#include "tantrix_socket.h"
-#include "util.h"
 
 #define ROW   20
 #define COL   10
@@ -228,6 +229,22 @@ void draw_cells(int *cells, struct logic_t *logic)
   wrefresh(win_cell);
 }
 
+void submit_score(char *score)
+{
+  struct socket_t socket = {0};
+  char message[512];
+  char msgbox_msg[512];
+
+  socket.host_name = "www.codedumpster.com";
+  socket.port = "80";
+    
+
+  sprintf(message, "GET /tantrix/?%s HTTP/1.0\r\n\r\n", score);
+
+  socket_connect(&socket);
+  socket_send_message(&socket, message);
+  socket_close(&socket);
+}
 
 void game_over(void)
 {

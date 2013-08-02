@@ -1,7 +1,7 @@
 CC		    = gcc
 CFLAGS	    = -I. -Wall -g -O0 
 LDFLAGS	    = -g -O0
-OBJS	    = logic.o util.o socket_unix.o tantrix_curses.o
+OBJS	    = logic.o util.o socket.o tantrix_curses.o
 
 DEPS		= ncursesw
 
