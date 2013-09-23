@@ -42,7 +42,7 @@ int socket_internal_connect(char *host, char *port)
 #if defined(_WIN32)
     initWinSock();
 #endif
-    memset(&hints, 0, sizeof(hints));
+    memset(&hints, 0, sizeof(struct addrinfo));
     hints.ai_family   = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
 
